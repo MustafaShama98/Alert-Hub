@@ -19,7 +19,7 @@ public class JiraFetcher {
     @Autowired
     PlatformInformationService platformInformationService;
 
-    @GetMapping(value="/jira")
+    @GetMapping("/jira")
     public StringBuilder getInfoData() {
         String rawTextUrl = "https://raw.githubusercontent.com/yones753/project_data_files/main/jira/jira_2024_08_22T13_30_00.csv";
         StringBuilder tmp = new StringBuilder();

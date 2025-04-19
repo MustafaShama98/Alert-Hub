@@ -4,17 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.evaluationservice.model.Task;
 
-import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoaderResponse {
-    private String id;
-    private String status;
-    private List<Task> tasks;
-    private long timestamp;
+public class DeveloperLabelAggregateResponse {
+    private String developerId;
+    private String developerName;
+    private Map<String, Integer> labelCounts;
+    private int timeFrameDays;
 } 

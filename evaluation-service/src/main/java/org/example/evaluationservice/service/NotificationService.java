@@ -1,24 +1,35 @@
 package org.example.evaluationservice.service;
 
-import org.example.evaluationservice.dto.NotificationDTO;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+public interface NotificationService {
+    
+    /**
+     * Send a notification to the notifications queue.
+     *
+     * @param message The message to send
+     * @param type The type of notification
+     */
+    void sendNotification(String message, String type);
+}
+
 @Service
-public class NotificationService {
+class NotificationServiceImpl implements NotificationService {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    private final String notificationTopic;
+    private final String notificationTopic = "notifications";
 
-    public NotificationService(KafkaTemplate<String, Object> kafkaTemplate,
-                             @Value("${kafka.topic.notification}") String notificationTopic) {
+    @Autowired
+    public NotificationServiceImpl(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
-        this.notificationTopic = notificationTopic;
     }
 
-    public void sendNotification(String message, String type, String source) {
-        NotificationDTO notification = new NotificationDTO(message, type, source);
+    @Override
+    public void sendNotification(String message, String type) {
+        String notification = String.format("{\"type\":\"%s\",\"message\":\"%s\",\"timestamp\":%d}", 
+                type, message, System.currentTimeMillis());
         kafkaTemplate.send(notificationTopic, notification);
     }
 } 
