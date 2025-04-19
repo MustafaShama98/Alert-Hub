@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * It provides endpoints for creating, updating, and retrieving evaluations.
  */
 @RestController
-@RequestMapping("/api/evaluations")
+@RequestMapping("/api/evaluation")
 public class EvaluationController {
 
     private EvaluationService evaluationService;
@@ -43,8 +43,8 @@ public class EvaluationController {
      * @return the highest label for the specified developer
      */
 
-    @GetMapping("developer/most-label/{developerId}/label-aggregate")
-    public String getHighestLabelForDeveloper(@PathVariable Integer developerId, @RequestParam String since) {
+    @GetMapping("developer/most-label/label-aggregate")
+    public String getHighestLabelForDeveloper() {
         return "Most Label for Developer";
     }
 
