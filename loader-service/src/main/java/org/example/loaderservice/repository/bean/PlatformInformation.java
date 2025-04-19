@@ -1,4 +1,4 @@
-package org.example.loaderservice.models;
+package org.example.loaderservice.repository.bean;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -16,12 +16,12 @@ import java.time.LocalDateTime;
 public class PlatformInformation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+//    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer task_id;
 
     @NotNull(message = "Task number cannot be null")
     @Column(nullable = false)
-    private Integer task_number = 0;
+    private String task_number;
 
     @NotNull(message = "Timestamp cannot be null")
     @Column(nullable = false, updatable = false)
@@ -48,8 +48,8 @@ public class PlatformInformation {
     @Column(nullable = false)
     private Integer developer_id = 0;
 
-    @Size(max = 500, message = "Issue description cannot exceed 500 characters")
-    private String issue;
+//    @Size(max = 500, message = "Issue description cannot exceed 500 characters")
+//    private String issue;
 
     @Size(max = 255, message = "Environment cannot exceed 255 characters")
     private String environment;
