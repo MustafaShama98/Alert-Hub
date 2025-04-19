@@ -3,6 +3,7 @@ package org.example.loaderservice.controller;
 import org.example.loaderservice.repository.bean.PlatformInformation;
 import org.example.loaderservice.service.PlatformInformationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,12 +14,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 @RestController
-@RequestMapping("/info")
+@RequestMapping("/api/loader/")
 public class JiraFetcher {
     @Autowired
     PlatformInformationService platformInformationService;
 
-    @RequestMapping(value="/getData",method = RequestMethod.POST)
+    @GetMapping(value="/jira")
     public StringBuilder getInfoData() {
         String rawTextUrl = "https://raw.githubusercontent.com/yones753/project_data_files/main/jira/jira_2024_08_22T13_30_00.csv";
         StringBuilder tmp = new StringBuilder();

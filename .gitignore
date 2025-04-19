@@ -23,3 +23,12 @@
 hs_err_pid*
 replay_pid*
 .idea/
+
+*.cmd
+*/application.properties
+/api-gateway/mvnw
+/api-gateway/mvnw.cmd
+/api-gateway/.mvn/wrapper/maven-wrapper.properties
+/eureka-discovery-service-server/mvnw
+/eureka-discovery-service-server/mvnw.cmd
+/eureka-discovery-service-server/.mvn/wrapper/maven-wrapper.properties
