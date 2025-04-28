@@ -1,21 +1,18 @@
 package org.example.evaluationservice.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class NotificationMessage implements Serializable {
-    @NotBlank
-    private String to;
-
-    @NotBlank
-    private String message;
-
+public class NotificationMessage {
     private String type;
+    private String message;
+    private long timestamp;
+
+    public static NotificationMessage create(String type, String message) {
+        return new NotificationMessage(type, message, System.currentTimeMillis());
+    }
 }

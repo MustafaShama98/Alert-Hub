@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Alert Hub Email Template Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #eee;
+        }
+        .email-preview {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #007bff;
+        }
+        .logo {
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        .content {
+            padding: 20px;
+            background-color: #ffffff;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #666;
+            background-color: #f8f9fa;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 12px;
+        }
+        .test-controls {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .test-controls h3 {
+            margin-top: 0;
+        }
+        .notification-type {
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Email Template Preview</h1>
+    <div class="test-controls">
+        <h3>Test Information</h3>
+        <p>This is a preview of how the email template will look with sample data.</p>
+    </div>
+
+    <div class="email-preview">
+        <div class="header">
+            <img src="AlertHub.png" alt="Alert Hub Logo" class="logo">
+            <h2>Alert Hub Notification</h2>
+            <p class="notification-type">🏆 MOST_LABEL_SEARCH</p>
+        </div>
+        <div class="content">
+            <div class="alert">
+                Developer John Doe has the most occurrences of label 'bug' with 5 tasks in the last 30 days
+            </div>
+            <p class="timestamp">Generated on: April 26, 2025 21:45:32 GMT</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated message from Alert Hub</p>
+            <p>© 2025 Alert Hub. All rights reserved.</p>
+        </div>
+    </div>
+
+    <div class="email-preview" style="margin-top: 30px;">
+        <div class="header">
+            <img src="AlertHub.png" alt="Alert Hub Logo" class="logo">
+            <h2>Alert Hub Notification</h2>
+            <p class="notification-type">📊 LABEL_AGGREGATE</p>
+        </div>
+        <div class="content">
+            <div class="alert">
+                Developer Jane Smith's label statistics for the last 7 days:<br>
+                - Bug fixes: 3<br>
+                - Feature implementations: 4<br>
+                - Code reviews: 7<br>
+                - Documentation: 2
+            </div>
+            <p class="timestamp">Generated on: April 26, 2025 21:45:32 GMT</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated message from Alert Hub</p>
+            <p>© 2025 Alert Hub. All rights reserved.</p>
+        </div>
+    </div>
+
+    <div class="email-preview" style="margin-top: 30px;">
+        <div class="header">
+            <img src="AlertHub.png" alt="Alert Hub Logo" class="logo">
+            <h2>Alert Hub Notification</h2>
+            <p class="notification-type">📋 TASK_AMOUNT</p>
+        </div>
+        <div class="content">
+            <div class="alert">
+                Weekly Task Summary for Team Alpha:<br>
+                - Total tasks: 25<br>
+                - Completed: 18<br>
+                - In Progress: 5<br>
+                - Blocked: 2
+            </div>
+            <p class="timestamp">Generated on: April 26, 2025 21:45:32 GMT</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated message from Alert Hub</p>
+            <p>© 2025 Alert Hub. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html> 

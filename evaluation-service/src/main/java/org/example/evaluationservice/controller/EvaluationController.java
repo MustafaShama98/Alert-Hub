@@ -22,7 +22,6 @@ public class EvaluationController {
     public EvaluationController(EvaluationService evaluationService) {
         this.evaluationService = evaluationService;
     }
-
     @GetMapping("/developer/most-label")
     public ResponseEntity<DeveloperMostLabelResponse> getDeveloperWithMostLabel(
             @RequestParam String label,
