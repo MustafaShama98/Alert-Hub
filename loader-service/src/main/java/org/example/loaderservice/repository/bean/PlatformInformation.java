@@ -39,7 +39,7 @@ public class PlatformInformation {
     @NotBlank(message = "Assignee cannot be blank")
     @Size(max = 255, message = "Assignee name cannot exceed 255 characters")
     @Column(nullable = false, length = 255)
-    private String assignee;
+    private String tag;
 
     @Size(max = 255, message = "Label cannot exceed 255 characters")
     private String label;

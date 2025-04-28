@@ -5,16 +5,18 @@ import org.example.loaderservice.service.PlatformInformationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/loader/")
+@RequestMapping("/api/loader/developer")
 public class JiraFetcher {
     @Autowired
     PlatformInformationService platformInformationService;
@@ -30,7 +32,6 @@ public class JiraFetcher {
             conn.setRequestMethod("GET");
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String header = reader.readLine();
             String line;
             while ((line = reader.readLine()) != null) {
                 // Split each line by comma, treating it as CSV
@@ -44,7 +45,7 @@ public class JiraFetcher {
                 task.setTask_id(Integer.parseInt(values[0]));
                 task.setManager_id(Integer.parseInt(values[1]));
                 task.setProject(values[2]);
-                task.setAssignee(values[3]);
+                task.setTag(values[3]);
                 task.setLabel(values[4]);
                 task.setDeveloper_id(Integer.parseInt(values[5]));
                 task.setTask_number(values[6]);
@@ -63,6 +64,27 @@ public class JiraFetcher {
         }
         return tmp;
 
+    }
+
+    @GetMapping("/most-label")
+    public  ResponseEntity<String> mostLabelDevelper(@RequestParam("label") String label,
+                                        @RequestParam("since") int sinceDays) {
+        String topDeveloper = platformInformationService.mostLabelDevelper(label, sinceDays);
+        return ResponseEntity.ok(topDeveloper);
+    }
+
+    @GetMapping("/{developer_id}/label-aggregate")
+    public  ResponseEntity< List<Object[]>> labelAggregate(@PathVariable String developer_id,
+                                                           @RequestParam int since) {
+        List<Object[]> topDeveloper = platformInformationService.labelAggregate(developer_id, since);
+        return ResponseEntity.ok(topDeveloper);
+    }
+
+    @GetMapping("/{developer_id}/task-amount")
+    public  ResponseEntity<Long> taskAmount(@PathVariable String developer_id,
+                                                           @RequestParam int since) {
+        Long topDeveloper = platformInformationService.taskAmount(developer_id, since);
+        return ResponseEntity.ok(topDeveloper);
     }
 }
 
