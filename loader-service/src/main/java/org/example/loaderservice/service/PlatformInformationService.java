@@ -1,5 +1,6 @@
 package org.example.loaderservice.service;
 
+import org.example.loaderservice.dto.LoaderResponseDTO;
 import org.example.loaderservice.repository.bean.PlatformInformation;
 import org.example.loaderservice.repository.PlatformInformationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,39 +22,44 @@ public class PlatformInformationService {
         platformInformationRepository.save(platformInformation);
     }
 
-    public String mostLabelDevelper(String label, int days) {
+    public LoaderResponseDTO mostLabelDevelper(String label, int days) {
         LocalDateTime sinceDate = LocalDateTime.now().minusDays(days);
         //Pageable topOne = PageRequest.of(0, 1);
 
-        List<Object[]> results = platformInformationRepository.findTopAssigneeByLabelSince(label, sinceDate);
+        List<LoaderResponseDTO> results = platformInformationRepository.findTopAssigneeByLabelSince(label, sinceDate);
 
         if (results.isEmpty()) {
-            return "No developer found for label '" + label + "' in the last " + days + " days.";
+            return new LoaderResponseDTO("No developer found for label '" + label + "' in the last " + days + " days.", null, null, null, null);
         }
 
-        Object[] topResult = results.get(0);
+        LoaderResponseDTO topResult = results.get(0);
 
-        return (String)topResult[0]; // developer name (assignee)
+        return topResult; // developer name (assignee)
     }
 
-    public List<Object[]> labelAggregate(String label, int days) {
+    public List<LoaderResponseDTO> labelAggregate(String label, int days) {
         LocalDateTime sinceDate = LocalDateTime.now().minusDays(days);
-        //Pageable topOne = PageRequest.of(0, 1);
 
-        List<Object[]> results = platformInformationRepository.countTasksByLabelForDeveloper(label, sinceDate);
+        List<LoaderResponseDTO> results = platformInformationRepository.countTasksByLabelForDeveloper(label, sinceDate);
 
         if (results.isEmpty()) {
-            List<Object[]> taskCounts = new ArrayList<>();
-            taskCounts.add(new Object[]{"No developer found for label '" + label + "' in the last " + days + " days."});
-            return taskCounts;
+            List<LoaderResponseDTO> emptyResponse = new ArrayList<>();
+            emptyResponse.add(new LoaderResponseDTO(
+                "no_data",
+                "no_data",
+                0L,
+                0L,
+                "No developer found for label '" + label + "' in the last " + days + " days."
+            ));
+            return emptyResponse;
         }
 
-        return results; // developer name (assignee)
+        return results;
     }
 
-    public Long taskAmount(String label, int days) {
+    public LoaderResponseDTO taskAmount(String label, int days) {
         LocalDateTime sinceDate = LocalDateTime.now().minusDays(days);
 
-        return platformInformationRepository.countTaskslForDeveloper(label, sinceDate);
+        return platformInformationRepository.countTasksForDeveloper(label, sinceDate);
     }
 }

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.example.evaluationservice.dto.LoaderResponseDTO;
 import org.example.evaluationservice.dto.PlatformInformationDTO;
 import org.example.evaluationservice.feign.LoaderServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.example.evaluationservice.dto.DeveloperLabelAggregateResponse;
 import org.example.evaluationservice.dto.DeveloperMostLabelResponse;
 import org.example.evaluationservice.dto.DeveloperTaskAmountResponse;
-import org.example.evaluationservice.dto.LoaderResponse;
 import org.example.evaluationservice.model.Task;
 
 public interface EvaluationService {
@@ -61,22 +61,23 @@ class EvaluationServiceImpl implements EvaluationService {
 
     @Override
     public DeveloperMostLabelResponse findDeveloperWithMostLabel(String label, int sinceDays) {
-        // For now, return mock data
-        DeveloperMostLabelResponse response = DeveloperMostLabelResponse.builder()
-                .developerId("DEV123")
-                .developerName("John Doe")
-                .label(label)
-                .count(5)
-                .timeFrameDays(sinceDays)
-                .build();
-        
+//        // For now, return mock data
+//        DeveloperMostLabelResponse response = DeveloperMostLabelResponse.builder()
+//                .developerId("DEV123")
+//                .developerName("John Doe")
+//                .label(label)
+//                .count(5)
+//                .timeFrameDays(sinceDays)
+//                .build();
+//
+        LoaderResponseDTO loaderResponse =  loaderServiceClient.mostLabelDevelper(label, sinceDays);
+
         // Send notification to Kafka
         String notificationMessage = String.format(
             "Developer %s has the most occurrences of label '%s' with %d tasks in the last %d days",
-            response.getDeveloperName(), 
-            response.getLabel(), 
-            response.getCount(), 
-            response.getTimeFrameDays()
+                loaderResponse.getLabel(),
+                loaderResponse.getCount(),
+                loaderResponse.getTimeFrameDays()
         );
         notificationService.sendNotification(notificationMessage, "email-topic","MOST_LABEL_SEARCH");
         

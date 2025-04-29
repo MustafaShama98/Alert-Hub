@@ -1,5 +1,6 @@
 package org.example.loaderservice.controller;
 
+import org.example.loaderservice.dto.LoaderResponseDTO;
 import org.example.loaderservice.repository.bean.PlatformInformation;
 import org.example.loaderservice.service.PlatformInformationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ public class JiraFetcher {
             conn.setRequestMethod("GET");
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            reader.readLine(); // skip first line
             String line;
             while ((line = reader.readLine()) != null) {
                 // Split each line by comma, treating it as CSV
@@ -67,23 +69,23 @@ public class JiraFetcher {
     }
 
     @GetMapping("/most-label")
-    public  ResponseEntity<String> mostLabelDevelper(@RequestParam("label") String label,
-                                        @RequestParam("since") int sinceDays) {
-        String topDeveloper = platformInformationService.mostLabelDevelper(label, sinceDays);
+    public  ResponseEntity<LoaderResponseDTO> mostLabelDevelper(@RequestParam("label") String label,
+                                                                @RequestParam("since") int sinceDays) {
+        var topDeveloper = platformInformationService.mostLabelDevelper(label, sinceDays);
         return ResponseEntity.ok(topDeveloper);
     }
 
     @GetMapping("/{developer_id}/label-aggregate")
-    public  ResponseEntity< List<Object[]>> labelAggregate(@PathVariable String developer_id,
+    public ResponseEntity<List<LoaderResponseDTO>> labelAggregate(@PathVariable String developer_id,
                                                            @RequestParam int since) {
-        List<Object[]> topDeveloper = platformInformationService.labelAggregate(developer_id, since);
+        var topDeveloper = platformInformationService.labelAggregate(developer_id, since);
         return ResponseEntity.ok(topDeveloper);
     }
 
     @GetMapping("/{developer_id}/task-amount")
-    public  ResponseEntity<Long> taskAmount(@PathVariable String developer_id,
-                                                           @RequestParam int since) {
-        Long topDeveloper = platformInformationService.taskAmount(developer_id, since);
+    public ResponseEntity<LoaderResponseDTO> taskAmount(@PathVariable String developer_id,
+                                                    @RequestParam int since) {
+        var topDeveloper = platformInformationService.taskAmount(developer_id, since);
         return ResponseEntity.ok(topDeveloper);
     }
 }
