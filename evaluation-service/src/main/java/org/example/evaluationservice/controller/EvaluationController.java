@@ -1,8 +1,11 @@
 package org.example.evaluationservice.controller;
 
+import java.util.List;
+
 import org.example.evaluationservice.dto.DeveloperLabelAggregateResponse;
 import org.example.evaluationservice.dto.DeveloperMostLabelResponse;
 import org.example.evaluationservice.dto.DeveloperTaskAmountResponse;
+import org.example.evaluationservice.dto.LoaderResponseDTO;
 import org.example.evaluationservice.service.EvaluationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +33,7 @@ public class EvaluationController {
     }
 
     @GetMapping("/developer/{developerId}/label-aggregate")
-    public ResponseEntity<DeveloperLabelAggregateResponse> getDeveloperLabelAggregate(
+    public ResponseEntity<List<LoaderResponseDTO>> getDeveloperLabelAggregate(
             @PathVariable String developerId,
             @RequestParam(defaultValue = "30") int since) {
         return ResponseEntity.ok(evaluationService.getDeveloperLabelAggregate(developerId, since));

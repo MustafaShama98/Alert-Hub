@@ -33,9 +33,9 @@ public interface EvaluationService {
      *
      * @param developerId The ID of the developer
      * @param sinceDays The number of days to look back
-     * @return The label aggregation for the developer
+     * @return List of label aggregations with counts for the developer
      */
-    DeveloperLabelAggregateResponse getDeveloperLabelAggregate(String developerId, int sinceDays);
+    List<LoaderResponseDTO> getDeveloperLabelAggregate(String developerId, int sinceDays);
     
     /**
      * Get the total number of tasks assigned to a developer within a time frame.
@@ -61,63 +61,60 @@ class EvaluationServiceImpl implements EvaluationService {
 
     @Override
     public DeveloperMostLabelResponse findDeveloperWithMostLabel(String label, int sinceDays) {
-//        // For now, return mock data
-//        DeveloperMostLabelResponse response = DeveloperMostLabelResponse.builder()
-//                .developerId("DEV123")
-//                .developerName("John Doe")
-//                .label(label)
-//                .count(5)
-//                .timeFrameDays(sinceDays)
-//                .build();
-//
-        LoaderResponseDTO loaderResponse =  loaderServiceClient.mostLabelDevelper(label, sinceDays);
-
-        // Send notification to Kafka
-        String notificationMessage = String.format(
-            "Developer %s has the most occurrences of label '%s' with %d tasks in the last %d days",
-                loaderResponse.getLabel(),
-                loaderResponse.getCount(),
-                loaderResponse.getTimeFrameDays()
-        );
-        notificationService.sendNotification(notificationMessage, "email-topic","MOST_LABEL_SEARCH");
+        LoaderResponseDTO loaderResponse = loaderServiceClient.mostLabelDevelper(label, sinceDays);
         
-        return response;
-    }
-
-    @Override
-    public DeveloperLabelAggregateResponse getDeveloperLabelAggregate(String developerId, int sinceDays) {
-        // Mock data for label aggregation
-        Map<String, Integer> labelCounts = new HashMap<>();
-        labelCounts.put("bug", 3);
-        labelCounts.put("feature", 2);
-        labelCounts.put("enhancement", 1);
-
-        DeveloperLabelAggregateResponse response = DeveloperLabelAggregateResponse.builder()
-                .developerId(developerId)
-                .developerName("John Doe")
-                .labelCounts(labelCounts)
+        DeveloperMostLabelResponse response = DeveloperMostLabelResponse.builder()
+                .developerId(loaderResponse.getTag())  // tag contains the developer ID
+                .developerName(loaderResponse.getTag()) // using tag as the developer name since that's what we store
+                .label(loaderResponse.getLabel())
+                .count(loaderResponse.getLabel_counts().intValue()) // convert Long to int
                 .timeFrameDays(sinceDays)
                 .build();
 
         // Send notification to Kafka
         String notificationMessage = String.format(
-            "Label aggregation for developer %s in the last %d days: %s",
+            "Developer %s has the most occurrences of label '%s' with %d tasks in the last %d days",
             response.getDeveloperName(),
-            response.getTimeFrameDays(),
-            response.getLabelCounts()
+            response.getLabel(),
+            response.getCount(),
+            response.getTimeFrameDays()
         );
-        notificationService.sendNotification(notificationMessage, "email-topic","LABEL_AGGREGATE");
-
+        notificationService.sendNotification(notificationMessage, "email-topic", "MOST_LABEL_SEARCH");
+        
         return response;
     }
 
     @Override
+    public List<LoaderResponseDTO> getDeveloperLabelAggregate(String developerId, int sinceDays) {
+        List<LoaderResponseDTO> loaderResponses = loaderServiceClient.labelAggregate(developerId, sinceDays);
+        
+        // Send notification to Kafka with a summary
+        StringBuilder labelsBuilder = new StringBuilder();
+        for (LoaderResponseDTO response : loaderResponses) {
+            labelsBuilder.append("\n- ").append(response.getLabel())
+                        .append(": ").append(response.getLabel_counts())
+                        .append(" tasks");
+        }
+        
+        String notificationMessage = String.format(
+            "Label aggregation for developer %s in the last %d days:%s",
+            developerId,
+            sinceDays,
+            labelsBuilder.toString()
+        );
+        notificationService.sendNotification(notificationMessage, "email-topic", "LABEL_AGGREGATE");
+
+        return loaderResponses;
+    }
+
+    @Override
     public DeveloperTaskAmountResponse getDeveloperTaskAmount(String developerId, int sinceDays) {
-        // Mock data for task amount
+        LoaderResponseDTO loaderResponse = loaderServiceClient.taskAmount(developerId, sinceDays);
+        
         DeveloperTaskAmountResponse response = DeveloperTaskAmountResponse.builder()
                 .developerId(developerId)
-                .developerName("John Doe")
-                .taskCount(8)
+                .developerName(developerId) // Using developerId as name since we don't have a separate name field
+                .taskCount(loaderResponse.getTask_counts().intValue())
                 .timeFrameDays(sinceDays)
                 .build();
 
@@ -128,7 +125,7 @@ class EvaluationServiceImpl implements EvaluationService {
             response.getTaskCount(),
             response.getTimeFrameDays()
         );
-        notificationService.sendNotification(notificationMessage,"email-topic", "TASK_AMOUNT");
+        notificationService.sendNotification(notificationMessage, "email-topic", "TASK_AMOUNT");
 
         return response;
     }
