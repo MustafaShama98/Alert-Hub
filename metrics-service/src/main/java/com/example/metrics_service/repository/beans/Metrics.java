@@ -2,16 +2,11 @@ package com.example.metrics_service.repository.beans;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Data
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
-@Table(name = "Metrics")  // You can change the table name if needed
+@Table(name = "metrics")
 public class Metrics {
 
     @Id
@@ -32,28 +27,4 @@ public class Metrics {
 
     @Column(name = "time_frame_hours", nullable = false)
     private Integer timeFrameHours;
-
-//    public Long getId() {
-//        return id;
-//    }
-//
-//    public String getUserId() {
-//        return userId;
-//    }
-//
-//    public String getName() {
-//        return name;
-//    }
-//
-//    public String getLabel() {
-//        return label;
-//    }
-//
-//    public Integer getThreshold() {
-//        return threshold;
-//    }
-//
-//    public Integer getTimeFrameHours() {
-//        return timeFrameHours;
-//    }
 }
