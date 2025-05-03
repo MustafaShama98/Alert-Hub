@@ -1,29 +1,66 @@
 package com.example.metrics_service.dto;
-import jakarta.persistence.Entity;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.*;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 public class MetricsDTO {
     private Long id;
-    @NotBlank(message = "Username is required")
     private String userId;
-    @NotBlank(message = "Name must not be blank")
     private String name;
-    @NotBlank(message = "Label must not be blank")
     private String label;
-
-    @NotNull(message = "Threshold is required")
-    @Min(value = 0, message = "Threshold must be greater than or equal to 0")
     private Integer threshold;
-
-    @NotNull(message = "Time frame (in hours) is required")
-    @Min(value = 1, message = "Time frame must be at least 1 hour")
     private Integer timeFrameHours;
+
+    public MetricsDTO(Long id, String userId, String name, String label, Integer threshold, Integer timeFrameHours) {
+        this.id = id;
+        this.userId = userId;
+        this.name = name;
+        this.label = label;
+        this.threshold = threshold;
+        this.timeFrameHours = timeFrameHours;
+    }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public Integer getThreshold() {
+        return threshold;
+    }
+
+    public void setThreshold(Integer threshold) {
+        this.threshold = threshold;
+    }
+
+    public Integer getTimeFrameHours() {
+        return timeFrameHours;
+    }
+
+    public void setTimeFrameHours(Integer timeFrameHours) {
+        this.timeFrameHours = timeFrameHours;
+    }
 }
