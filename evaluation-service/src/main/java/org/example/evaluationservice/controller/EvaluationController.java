@@ -6,6 +6,7 @@ import org.example.evaluationservice.dto.DeveloperLabelAggregateResponse;
 import org.example.evaluationservice.dto.DeveloperMostLabelResponse;
 import org.example.evaluationservice.dto.DeveloperTaskAmountResponse;
 import org.example.evaluationservice.dto.LoaderResponseDTO;
+import org.example.evaluationservice.dto.EvaluationRequest;
 import org.example.evaluationservice.service.EvaluationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,15 @@ public class EvaluationController {
     public EvaluationController(EvaluationService evaluationService) {
         this.evaluationService = evaluationService;
     }
+
+    @PostMapping("/developer/{developerId}/evaluate")
+    public ResponseEntity<Void> triggerEvaluation(
+            @PathVariable String developerId,
+            @RequestBody EvaluationRequest request) {
+        evaluationService.processEvaluation(developerId, request.getLabel(), request.getTimeRange());
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/developer/most-label")
     public ResponseEntity<DeveloperMostLabelResponse> getDeveloperWithMostLabel(
             @RequestParam String label,

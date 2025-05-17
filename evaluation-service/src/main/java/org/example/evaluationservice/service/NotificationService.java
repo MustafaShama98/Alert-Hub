@@ -1,6 +1,6 @@
 package org.example.evaluationservice.service;
 
-import org.example.evaluationservice.dto.NotificationMessage;
+import org.example.evaluationservice.dto.NotificationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -10,26 +10,24 @@ public interface NotificationService {
     /**
      * Send a notification to the notifications queue.
      *
-     * @param message The message to send
+     * @param notification The notification DTO to send
      * @param topic The topic to send to
-     * @param type The type of notification
      */
-    void sendNotification(String message, String topic, String type);
+    void sendNotification(NotificationDTO notification, String topic);
 }
 
 @Service
 class NotificationServiceImpl implements NotificationService {
 
-    private final KafkaTemplate<String, NotificationMessage> kafkaTemplate;
+    private final KafkaTemplate<String, NotificationDTO> kafkaTemplate;
 
     @Autowired
-    public NotificationServiceImpl(KafkaTemplate<String, NotificationMessage> kafkaTemplate) {
+    public NotificationServiceImpl(KafkaTemplate<String, NotificationDTO> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
     @Override
-    public void sendNotification(String message, String topic, String type) {
-        NotificationMessage notification = NotificationMessage.create(type, message);
+    public void sendNotification(NotificationDTO notification, String topic) {
         kafkaTemplate.send(topic, notification);
     }
 } 

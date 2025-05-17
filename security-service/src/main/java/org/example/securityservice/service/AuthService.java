@@ -47,22 +47,7 @@ public class AuthService {
 
         // Load user details using email
         var user = (User) userDetailsService.loadUserByEmail(request.getEmail());
-        
-        // Create claims with permissions
-        Map<String, Object> extraClaims = new HashMap<>();
-        String permissions = permissionService.getUserPermissionsAsString(user.getId());
-        System.out.println("Permissions: " + permissions);
-        extraClaims.put("permissions", permissions);
-        
-        // Set permissions in user object for authorities
-        user.setPermissions(permissionService.getUserPermissions(user.getId()));
-        
-        // Generate token using the user details and claims
-        var token = jwtService.generateToken(extraClaims, user);
-        
-        return AuthResponse.builder()
-                .token(token)
-                .build();
+        return generateAuthResponse(user);
     }
 
     @Transactional
@@ -74,45 +59,40 @@ public class AuthService {
 
         // Create new user with email as the username
         var user = User.builder()
-                .username(request.getEmail()) // Use email as username for consistency
+                .username(request.getEmail())
                 .email(request.getEmail())
                 .phone(request.getPhone())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
-        var userRequest = UserRequest.builder()
-                .username(request.getEmail())
-                .email(request.getEmail())
-                .phone(request.getPhone())
-                .password(request.getPassword())
-                .build();
-
-        var userResponse = usersFeignClient.createUser(userRequest);
         // Save the user first
         user = userRepository.save(user);
 
         // Assign default permissions
         Permission[] defaultPermissions = {
-            Permission.READ,
-//            Permission.CREATE_ACTION,
-//            Permission.UPDATE_ACTION,
-//            Permission.TRIGGER_SCAN,
-//            Permission.TRIGGER_PROCESS,
-//            Permission.TRIGGER_EVALUATION
+            Permission.READ
         };
 
         // Add all default permissions at once
         permissionService.setUserPermissions(user.getId(), defaultPermissions);
         
+        return generateAuthResponse(user);
+    }
+
+    // Helper method to generate auth response
+    public AuthResponse generateAuthResponse(User user) {
         // Set permissions in user object for authorities
         user.setPermissions(permissionService.getUserPermissions(user.getId()));
         
-        // Create claims with permissions
+        // Create claims with user information and permissions
         Map<String, Object> extraClaims = new HashMap<>();
         String permissions = permissionService.getUserPermissionsAsString(user.getId());
+        
+        extraClaims.put("userId", user.getId().toString());
+        extraClaims.put("email", user.getEmail());
         extraClaims.put("permissions", permissions);
         
-        // Generate token for the new user
+        // Generate token using the user details and claims
         var token = jwtService.generateToken(extraClaims, user);
         
         return AuthResponse.builder()

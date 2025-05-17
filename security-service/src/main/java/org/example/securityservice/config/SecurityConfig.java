@@ -11,11 +11,13 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
+@Slf4j
 public class SecurityConfig {
 
     private final JWTAuthFilter jwtAuthFilter;
@@ -23,11 +25,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        log.debug("🔒 Configuring security filter chain");
+        
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/api/demo/**").permitAll()
+                .requestMatchers("/api/security/auth/**").permitAll()
+                .requestMatchers("/api/security/admin/**").hasAuthority("admin")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
@@ -36,6 +40,7 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider)
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
+        log.debug("✅ Security filter chain configured");
         return http.build();
     }
 }

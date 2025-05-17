@@ -1,4 +1,4 @@
-package org.example.apigateway.config;
+package org.example.apigateway.filter;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -25,14 +25,16 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
+        String path = request.getURI().getPath();
 
         // Allow public paths (e.g., login, register)
-        if (request.getURI().getPath().contains("/api/auth")) {
+        if (path.startsWith("/api/security/auth")) {
             return chain.filter(exchange);
         }
 
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("❌ Missing or invalid Authorization header for path: " + path);
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
@@ -45,16 +47,26 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
                     .parseClaimsJws(token)
                     .getBody();
 
-            System.out.println("✅ JWT valid for: " + claims.getSubject());
-            System.out.println("✅ JWT permissions: " + claims.get("permissions"));
-
             String userEmail = claims.getSubject();
             String permissions = claims.get("permissions", String.class);
+            String userId = claims.get("userId", String.class);
 
+            if (userEmail == null || permissions == null || userId == null) {
+                System.out.println("❌ Missing required claims in JWT");
+                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                return exchange.getResponse().setComplete();
+            }
+
+            System.out.println("✅ JWT valid for: " + userEmail);
+            System.out.println("✅ JWT permissions: " + permissions);
+
+            // Add user information to headers and preserve Authorization header
             ServerHttpRequest mutatedRequest = exchange.getRequest()
                     .mutate()
-                    .header("X-USER-ID", userEmail)
+                    .header("X-USER-ID", userId)
+                    .header("X-USER-EMAIL", userEmail)
                     .header("X-PERMISSIONS", permissions)
+                    .header(HttpHeaders.AUTHORIZATION, authHeader)  // Preserve the original Authorization header
                     .build();
 
             return chain.filter(exchange.mutate().request(mutatedRequest).build());
@@ -68,7 +80,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        // Execute before PermissionFilter but after LoggingFilter
-        return Ordered.HIGHEST_PRECEDENCE + 1;
+        // Execute after LoggingFilter but before PermissionFilter
+        return Ordered.HIGHEST_PRECEDENCE + 2;
     }
 }

@@ -73,42 +73,26 @@ const runConsumer = async () => {
                         value: messageStr
                     });
 
-                    let messageValue;
-                    try {
-                        messageValue = messageStr ? JSON.parse(messageStr) : {};
-                    } catch (parseError) {
-                        console.error('Error parsing message value:', parseError);
-                        messageValue = {};
-                    }
+                    // Parse the notification
+                    const notification = NotificationDTO.fromJSON(messageStr);
+                    const userInfo = notification.getUserInfo();
+                    const { subject, content } = notification.getNotificationContent();
 
-                    const messageType = messageValue.type || 'DEFAULT';
-                    
-                    // Create notification DTO from message
-                    const notification = NotificationDTO.fromJSON({
-                        type: messageType,
-                        message: messageValue.message || '',
-                        timestamp: messageValue.timestamp || Date.now()
-                    });
-
-                    console.log('Created notification:', {
+                    console.log('Processing notification:', {
                         type: notification.type,
-                        message: notification.message,
-                        timestamp: notification.timestamp
+                        user: userInfo,
+                        subject: subject
                     });
-
-                    // Generate email content
-                    const htmlContent = EmailTemplate.createTemplate(notification);
-                    const subject = EmailTemplate.getSubjectForType(notification.type);
 
                     // Send email
                     await emailService.sendEmail(
-                        process.env.EMAIL_USER,
+                        userInfo.email, // Send to the user's email
                         subject,
-                        htmlContent,
-                        notification.message
+                        content,
+                        null // No plain text version needed since we're using HTML
                     );
 
-                    console.log('Successfully processed message');
+                    console.log('Successfully sent email to:', userInfo.email);
 
                 } catch (error) {
                     console.error('Error processing message:', error);
