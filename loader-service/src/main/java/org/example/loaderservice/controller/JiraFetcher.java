@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -23,10 +24,10 @@ public class JiraFetcher {
     PlatformInformationService platformInformationService;
 
     @GetMapping("/jira")
-    public StringBuilder getInfoData() {
+    public List<PlatformInformation> getInfoData() {
         String rawTextUrl = "https://raw.githubusercontent.com/yones753/project_data_files/main/jira/jira_2024_08_22T13_30_00.csv";
         StringBuilder tmp = new StringBuilder();
-
+        List<PlatformInformation> savedTasks = new ArrayList<>();
         try {
             URL url = new URL(rawTextUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -57,6 +58,7 @@ public class JiraFetcher {
                 task.setSprint(values[10]);
                 // Save the task
                 platformInformationService.addNewInfo(task);
+                savedTasks.add(task);
             }
 
 
@@ -64,7 +66,7 @@ public class JiraFetcher {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return tmp;
+        return savedTasks;
 
     }
 

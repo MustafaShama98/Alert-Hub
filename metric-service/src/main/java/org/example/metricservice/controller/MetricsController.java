@@ -24,7 +24,7 @@ public class MetricsController {
     // Get a specific Metrics record by ID
 
     @GetMapping("/{id}/by-id")
-    public ResponseEntity<Metrics> getMatricsById(@PathVariable Long id) {
+    public ResponseEntity<Metrics> getMatricById(@PathVariable Long id) {
         if(metricsService.getMetricsById(id)==null){
             //404
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

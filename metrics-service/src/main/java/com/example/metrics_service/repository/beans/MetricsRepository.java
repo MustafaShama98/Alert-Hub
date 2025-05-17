@@ -1,4 +1,4 @@
-package com.example.metrics_service.repository;
+package com.example.metrics_service.repository.beans;
 
 import com.example.metrics_service.repository.beans.Metrics;
 import org.springframework.data.jpa.repository.JpaRepository;
