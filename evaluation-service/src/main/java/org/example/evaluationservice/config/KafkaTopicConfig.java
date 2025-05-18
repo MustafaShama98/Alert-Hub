@@ -19,11 +19,6 @@ import java.util.Map;
 @Configuration
 public class KafkaTopicConfig {
 
-    @Bean
-    public NewTopic smsTopic() {
-        return TopicBuilder.name("email-topic")
-                .build();
-    }
 
     @Bean
     public NewTopic emailTopic() {
