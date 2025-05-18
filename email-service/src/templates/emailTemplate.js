@@ -41,11 +41,36 @@ class EmailTemplate {
                 color: #666;
                 font-size: 12px;
             }
+            .user-info {
+                margin-bottom: 20px;
+                padding: 10px;
+                background-color: #e9ecef;
+                border-radius: 4px;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 15px 0;
+            }
+            th, td {
+                padding: 8px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+            th {
+                background-color: #f8f9fa;
+            }
+            .label-count {
+                font-weight: bold;
+                color: #007bff;
+            }
         `;
     }
 
     static createTemplate(notification) {
         const logoUrl = `https://preparecenter.org/wp-content/uploads/2021/04/AlertHub.png`;
+        const { subject, content } = notification.getNotificationContent();
+        const userInfo = notification.getUserInfo();
 
         return `
         <!DOCTYPE html>
@@ -58,12 +83,15 @@ class EmailTemplate {
         <body>
             <div class="header">
                 <img src="${logoUrl}" alt="Alert Hub Logo" class="logo">
-                <h2>Alert Hub Notification</h2>
+                <h2>${subject}</h2>
                 <p>${notification.getFormattedType()}</p>
             </div>
             <div class="content">
+                <div class="user-info">
+                    <strong>Generated for:</strong> ${userInfo.name} (${userInfo.email})
+                </div>
                 <div class="alert">
-                    ${notification.message}
+                    ${content}
                 </div>
                 <p class="timestamp">Generated on: ${notification.getFormattedTimestamp()}</p>
             </div>

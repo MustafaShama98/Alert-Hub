@@ -1,21 +1,18 @@
 package org.example.evaluationservice.service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 import org.example.evaluationservice.dto.LoaderResponseDTO;
-import org.example.evaluationservice.dto.PlatformInformationDTO;
+import org.example.evaluationservice.dto.NotificationDTO;
 import org.example.evaluationservice.feign.LoaderServiceClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import org.example.evaluationservice.dto.DeveloperLabelAggregateResponse;
 import org.example.evaluationservice.dto.DeveloperMostLabelResponse;
 import org.example.evaluationservice.dto.DeveloperTaskAmountResponse;
-import org.example.evaluationservice.model.Task;
+import org.example.evaluationservice.util.UserContext;
+import lombok.RequiredArgsConstructor;
 
 public interface EvaluationService {
     
@@ -45,19 +42,25 @@ public interface EvaluationService {
      * @return The total number of tasks for the developer
      */
     DeveloperTaskAmountResponse getDeveloperTaskAmount(String developerId, int sinceDays);
+
+    /**
+     * Process evaluation for a developer.
+     *
+     * @param developerId The ID of the developer
+     * @param label The label to evaluate
+     * @param timeRange The time range in days
+     */
+    void processEvaluation(String developerId, String label, int timeRange);
+
+    void validateUserAccess(String targetDeveloperId);
 }
 
 @Service
+@RequiredArgsConstructor
 class EvaluationServiceImpl implements EvaluationService {
 
     private final LoaderServiceClient loaderServiceClient;
     private final NotificationService notificationService;
-
-    @Autowired
-    public EvaluationServiceImpl(LoaderServiceClient loaderServiceClient, NotificationService notificationService) {
-        this.loaderServiceClient = loaderServiceClient;
-        this.notificationService = notificationService;
-    }
 
     @Override
     public DeveloperMostLabelResponse findDeveloperWithMostLabel(String label, int sinceDays) {
@@ -71,15 +74,28 @@ class EvaluationServiceImpl implements EvaluationService {
                 .timeFrameDays(sinceDays)
                 .build();
 
-        // Send notification to Kafka
-        String notificationMessage = String.format(
-            "Developer %s has the most occurrences of label '%s' with %d tasks in the last %d days",
-            response.getDeveloperName(),
-            response.getLabel(),
-            response.getCount(),
-            response.getTimeFrameDays()
-        );
-        notificationService.sendNotification(notificationMessage, "email-topic", "MOST_LABEL_SEARCH");
+        var user_id = UserContext.getUserId();
+        var user_email = UserContext.getUserEmail();
+
+        // Create structured notification
+        NotificationDTO notification = NotificationDTO.builder()
+                .type("MOST_LABEL_SEARCH")
+                .topic("email-topic")
+                .timestamp(LocalDateTime.now())
+                .user(NotificationDTO.UserInfo.builder()
+                        .userId(user_id)
+                        .email(user_email)
+                        .build())
+                .data(NotificationDTO.MostLabelData.builder()
+                        .developerId(response.getDeveloperId())
+                        .developerName(response.getDeveloperName())
+                        .label(response.getLabel())
+                        .count(response.getCount())
+                        .timeFrameDays(response.getTimeFrameDays())
+                        .build())
+                .build();
+
+        notificationService.sendNotification(notification, "email-topic");
         
         return response;
     }
@@ -88,21 +104,33 @@ class EvaluationServiceImpl implements EvaluationService {
     public List<LoaderResponseDTO> getDeveloperLabelAggregate(String developerId, int sinceDays) {
         List<LoaderResponseDTO> loaderResponses = loaderServiceClient.labelAggregate(developerId, sinceDays);
         
-        // Send notification to Kafka with a summary
-        StringBuilder labelsBuilder = new StringBuilder();
-        for (LoaderResponseDTO response : loaderResponses) {
-            labelsBuilder.append("\n- ").append(response.getLabel())
-                        .append(": ").append(response.getLabel_counts())
-                        .append(" tasks");
-        }
-        
-        String notificationMessage = String.format(
-            "Label aggregation for developer %s in the last %d days:%s",
-            developerId,
-            sinceDays,
-            labelsBuilder.toString()
-        );
-        notificationService.sendNotification(notificationMessage, "email-topic", "LABEL_AGGREGATE");
+        // Create structured notification
+        List<NotificationDTO.LabelCount> labelCounts = loaderResponses.stream()
+                .map(response -> NotificationDTO.LabelCount.builder()
+                        .label(response.getLabel())
+                        .count(response.getLabel_counts())
+                        .build())
+                .collect(Collectors.toList());
+
+        var user_id = UserContext.getUserId();
+        var user_email = UserContext.getUserEmail();
+
+        NotificationDTO notification = NotificationDTO.builder()
+                .type("LABEL_AGGREGATE")
+                .topic("email-topic")
+                .timestamp(LocalDateTime.now())
+                .user(NotificationDTO.UserInfo.builder()
+                        .userId(user_id)
+                        .email(user_email)
+                        .build())
+                .data(NotificationDTO.LabelAggregateData.builder()
+                        .developerId(developerId)
+                        .timeFrameDays(sinceDays)
+                        .labels(labelCounts)
+                        .build())
+                .build();
+
+        notificationService.sendNotification(notification, "email-topic");
 
         return loaderResponses;
     }
@@ -113,21 +141,91 @@ class EvaluationServiceImpl implements EvaluationService {
         
         DeveloperTaskAmountResponse response = DeveloperTaskAmountResponse.builder()
                 .developerId(developerId)
-                .developerName(developerId) // Using developerId as name since we don't have a separate name field
+                .developerName(developerId)
                 .taskCount(loaderResponse.getTask_counts().intValue())
                 .timeFrameDays(sinceDays)
                 .build();
 
-        // Send notification to Kafka
-        String notificationMessage = String.format(
-            "Developer %s has completed %d tasks in the last %d days",
-            response.getDeveloperName(),
-            response.getTaskCount(),
-            response.getTimeFrameDays()
-        );
-        notificationService.sendNotification(notificationMessage, "email-topic", "TASK_AMOUNT");
+        var user_id = UserContext.getUserId();
+        var user_email = UserContext.getUserEmail();
+
+        // Create structured notification
+        NotificationDTO notification = NotificationDTO.builder()
+                .type("TASK_AMOUNT")
+                .topic("email-topic")
+                .timestamp(LocalDateTime.now())
+                .user(NotificationDTO.UserInfo.builder()
+                        .userId(user_id)
+                        .email(user_email)
+                        .build())
+                .data(NotificationDTO.TaskAmountData.builder()
+                        .developerId(response.getDeveloperId())
+                        .developerName(response.getDeveloperName())
+                        .taskCount(response.getTaskCount())
+                        .timeFrameDays(response.getTimeFrameDays())
+                        .build())
+                .build();
+
+        notificationService.sendNotification(notification, "email-topic");
 
         return response;
+    }
+
+    @Override
+    public void processEvaluation(String developerId, String label, int timeRange) {
+        // Get user information
+        String userId = UserContext.getUserId();
+        String userEmail = UserContext.getUserEmail();
+        String permissions = UserContext.getUserPermissions();
+
+        // Log who is performing the evaluation
+        System.out.println("Evaluation requested by: " + userEmail);
+        System.out.println("Label: " + label);
+        System.out.println("Time Range: " + timeRange + " days");
+
+
+//        // Check if user is evaluating their own work or has admin access
+//        if (!userId.equals(developerId) && !permissions.contains("admin")) {
+//            throw new RuntimeException("You can only evaluate your own work unless you're an admin");
+//        }
+
+        // Proceed with evaluation logic
+        performEvaluation(developerId, label, timeRange);
+    }
+
+    private void performEvaluation(String developerId, String label, int timeRange) {
+        // Your evaluation logic here
+        System.out.println("Performing evaluation for developer: " + developerId);
+        System.out.println("Evaluating " + label + " issues in the last " + timeRange + " days");
+        
+        // Create notification for the evaluation
+        NotificationDTO notification = NotificationDTO.builder()
+            .type("EVALUATION_TRIGGERED")
+            .topic("evaluation-topic")
+            .timestamp(LocalDateTime.now())
+            .user(NotificationDTO.UserInfo.builder()
+                .userId(UserContext.getUserId())
+                .email(UserContext.getUserEmail())
+                .build())
+            .data(NotificationDTO.EvaluationData.builder()
+                .developerId(developerId)
+                .label(label)
+                .timeRange(timeRange)
+                .build())
+            .build();
+
+        notificationService.sendNotification(notification, "evaluation-topic");
+    }
+
+    @Override
+    public void validateUserAccess(String targetDeveloperId) {
+        String userId = UserContext.getUserId();
+        String permissions = UserContext.getUserPermissions();
+
+        boolean hasAccess = userId.equals(targetDeveloperId) || permissions.contains("admin");
+        if (!hasAccess) {
+            throw new RuntimeException("Access denied: You can only access your own data unless you're an admin");
+        }
     }
 }
 

@@ -25,9 +25,4 @@ public class GatewayConfig {
 
         return new CorsWebFilter(source);
     }
-
-    @Bean
-    public JwtAuthFilter jwtAuthenticationFilter() {
-        return new JwtAuthFilter();
-    }
 } 

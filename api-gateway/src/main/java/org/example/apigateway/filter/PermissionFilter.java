@@ -29,22 +29,42 @@ public class PermissionFilter implements GlobalFilter, Ordered {
         String path = request.getURI().getPath();
 
         // Skip auth endpoints
-        if (path.startsWith("/api/auth")) {
+        if (path.startsWith("/api/security/auth")) {
             return chain.filter(exchange);
         }
 
-        // Get permissions from request header (set by JwtAuthFilter)
+        // Get user information from headers (set by JwtAuthFilter)
         String permissionsHeader = request.getHeaders().getFirst("X-PERMISSIONS");
+        String userId = request.getHeaders().getFirst("X-USER-ID");
+        String userEmail = request.getHeaders().getFirst("X-USER-EMAIL");
+        
         System.out.println("👮 Checking permissions for path: " + path);
         System.out.println("👮 User permissions: " + permissionsHeader);
+        System.out.println("👤 User ID: " + userId);
+        System.out.println("📧 User Email: " + userEmail);
         
-        if (permissionsHeader == null) {
-            System.out.println("❌ No permissions found in header");
+        if (permissionsHeader == null || userId == null || userEmail == null) {
+            System.out.println("❌ Missing required user information in headers");
             exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
             return exchange.getResponse().setComplete();
         }
 
         List<String> userPermissions = Arrays.asList(permissionsHeader.split(","));
+
+        // If user has admin permission, allow access to all endpoints
+        if (userPermissions.contains("admin")) {
+            System.out.println("✅ Admin permission granted - full access");
+            // Forward the request with user information
+            ServerHttpRequest modifiedRequest = request.mutate()
+                .headers(headers -> {
+//                    headers.remove("Authorization"); // Remove JWT token
+                    headers.set("X-USER-ID", userId);
+                    headers.set("X-USER-EMAIL", userEmail);
+                    headers.set("X-PERMISSIONS", permissionsHeader);
+                })
+                .build();
+            return chain.filter(exchange.mutate().request(modifiedRequest).build());
+        }
 
         // Check if any endpoint pattern matches and verify permissions
         boolean hasPermission = endpointPermissions.entrySet().stream()
@@ -61,12 +81,21 @@ public class PermissionFilter implements GlobalFilter, Ordered {
         }
 
         System.out.println("✅ Permission granted");
-        return chain.filter(exchange);
+        // Forward the request with user information
+        ServerHttpRequest modifiedRequest = request.mutate()
+            .headers(headers -> {
+//                headers.remove("Authorization"); // Remove JWT token
+                headers.set("X-USER-ID", userId);
+                headers.set("X-USER-EMAIL", userEmail);
+                headers.set("X-PERMISSIONS", permissionsHeader);
+            })
+            .build();
+        return chain.filter(exchange.mutate().request(modifiedRequest).build());
     }
 
     @Override
     public int getOrder() {
-        // Execute after JWT filter
-        return Ordered.HIGHEST_PRECEDENCE + 2;
+        // Execute after JWT filter but before RateLimitFilter
+        return Ordered.HIGHEST_PRECEDENCE + 3;
     }
 } 

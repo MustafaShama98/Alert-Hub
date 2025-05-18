@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.example.evaluationservice.dto.NotificationMessage;
+import org.example.evaluationservice.dto.NotificationDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,12 +36,12 @@ public class KafkaProducerConfig
     }
 
     @Bean
-    public ProducerFactory<String, NotificationMessage> producerFactory() {
+    public ProducerFactory<String, NotificationDTO> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
 
     @Bean
-    public KafkaTemplate<String, NotificationMessage> kafkaTemplate() {
+    public KafkaTemplate<String, NotificationDTO> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }

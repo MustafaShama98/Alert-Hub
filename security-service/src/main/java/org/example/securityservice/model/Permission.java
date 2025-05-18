@@ -10,7 +10,13 @@ public enum Permission {
     TRIGGER_SCAN(7, "triggerScan"),
     TRIGGER_PROCESS(8, "triggerProcess"),
     TRIGGER_EVALUATION(9, "triggerEvaluation"),
-    READ(10, "read");
+    READ(10, "read"),
+    // Admin specific permissions
+    CREATE_USER(11, "createUser"),
+    DELETE_USER(12, "deleteUser"),
+    GRANT_PERMISSION(13, "grantPermission"),
+    REVOKE_PERMISSION(14, "revokePermission"),
+    ADMIN(15, "admin"); // Special permission that includes all permissions
 
     private final int id;
     private final String permission;

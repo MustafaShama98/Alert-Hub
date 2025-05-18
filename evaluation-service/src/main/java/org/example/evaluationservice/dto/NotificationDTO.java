@@ -1,53 +1,66 @@
 package org.example.evaluationservice.dto;
 
+import lombok.Builder;
+import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.List;
 
+@Data
+@Builder
 public class NotificationDTO {
-    private String message;
     private String type;
+    private String topic;
     private LocalDateTime timestamp;
-    private String source;
+    private UserInfo user;
+    private Object data;
 
-    public NotificationDTO() {
+    @Data
+    @Builder
+    public static class UserInfo {
+        private String userId;
+        private String email;
+        private String name;
     }
 
-    public NotificationDTO(String message, String type, String source) {
-        this.message = message;
-        this.type = type;
-        this.source = source;
-        this.timestamp = LocalDateTime.now();
+    @Data
+    @Builder
+    public static class MostLabelData {
+        private String developerId;
+        private String developerName;
+        private String label;
+        private int count;
+        private int timeFrameDays;
     }
 
-    // Getters and Setters
-    public String getMessage() {
-        return message;
+    @Data
+    @Builder
+    public static class LabelAggregateData {
+        private String developerId;
+        private int timeFrameDays;
+        private List<LabelCount> labels;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    @Data
+    @Builder
+    public static class LabelCount {
+        private String label;
+        private Long count;
     }
 
-    public String getType() {
-        return type;
+    @Data
+    @Builder
+    public static class TaskAmountData {
+        private String developerId;
+        private String developerName;
+        private int taskCount;
+        private int timeFrameDays;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
+    @Data
+    @Builder
+    public static class EvaluationData {
+        private String developerId;
+        private String label;
+        private int timeRange;
     }
 } 

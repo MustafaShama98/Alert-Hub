@@ -14,6 +14,9 @@ public class PermissionConfig {
     public Map<Pattern, String> endpointPermissions() {
         Map<Pattern, String> permissions = new HashMap<>();
         
+        // Security Service permissions
+        permissions.put(Pattern.compile("^/api/security/admin/.*"), "admin");
+        
         // Loader Service permissions
         permissions.put(Pattern.compile("^/api/loader/.*"), "triggerScan");
         
@@ -22,9 +25,8 @@ public class PermissionConfig {
         permissions.put(Pattern.compile("^/api/evaluation/developer/.*/label-aggregate"), "triggerEvaluation");
         permissions.put(Pattern.compile("^/api/evaluation/developer/.*/task-amount"), "triggerEvaluation");
         
-        // Users Service permissions
-        permissions.put(Pattern.compile("^/api/users$"), "createAction");  // POST to create user
-        permissions.put(Pattern.compile("^/api/users/.*"), "updateAction"); // PUT to update user
+
+
         
         return permissions;
     }
