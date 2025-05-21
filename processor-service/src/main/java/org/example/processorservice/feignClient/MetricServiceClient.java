@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "metric-service") // Change port if needed
+@FeignClient(name = "metric-service" , url = "http://localhost:8083") // Change port if needed
 public interface MetricServiceClient {
 
     @GetMapping("/metrics/{id}/by-id")

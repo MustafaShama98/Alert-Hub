@@ -40,7 +40,8 @@ public class ProcessorService {
     public MetricsDTO deleteMetric(Long id) {
         return metricClient.deleteMetric(id).getBody();
     }
-    public List<PlatformInformationDTO> getInformation(Long id) {
+
+    public List<PlatformInformationDTO> getInformation() {
         return loaderClient.getInfoData().getBody();
     }
 

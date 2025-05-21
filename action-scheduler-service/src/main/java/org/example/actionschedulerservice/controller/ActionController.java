@@ -10,7 +10,7 @@ import org.example.actionschedulerservice.service.ActionService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/actions")
+@RequestMapping("/api/action")
 public class ActionController {
     @Autowired
     private ActionService actionService;

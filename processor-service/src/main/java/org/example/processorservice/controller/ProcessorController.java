@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/processor/metrics")
+@RequestMapping("/api/processor")
 public class ProcessorController {
 
     private final ProcessorService processorService;

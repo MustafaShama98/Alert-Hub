@@ -24,10 +24,16 @@ public class PermissionConfig {
         permissions.put(Pattern.compile("^/api/evaluation/developer/most-label"), "triggerEvaluation");
         permissions.put(Pattern.compile("^/api/evaluation/developer/.*/label-aggregate"), "triggerEvaluation");
         permissions.put(Pattern.compile("^/api/evaluation/developer/.*/task-amount"), "triggerEvaluation");
-        
+
+        permissions.put(Pattern.compile("^/api/processor/.*"), "triggerProcess");
+
+        permissions.put(Pattern.compile("^/api/metrics/addMetric"), "createAction");
+        permissions.put(Pattern.compile("^/api/metrics/.*/delete"), "deleteAction");
+        permissions.put(Pattern.compile("^/api/metrics/.*"), "updateAction");
 
 
-        
+
+
         return permissions;
     }
 } 

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.example.metricservice.models.Label;
 
 import java.time.LocalDateTime;
 
@@ -34,7 +35,8 @@ public class Metrics {
 
     @NotNull(message = "Label cannot be null")
     @Column(nullable = false)
-    private String label;
+    @Enumerated(EnumType.STRING)
+    private Label label;
 
     @NotNull(message = "Threshold cannot be null")
     @Min(value = 0, message = "Threshold must be a positive number")

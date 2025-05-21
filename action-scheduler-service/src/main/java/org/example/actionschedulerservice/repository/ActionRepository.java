@@ -15,6 +15,7 @@ public interface ActionRepository extends JpaRepository<Action, Long> {
     Optional<Action> findById(Long id);
     Optional<List<Action>> findByRunOnDay(RunOnDay day);
     Optional<List<Action>> findByRunOnTime(LocalTime time);
+    List<Action> findByRunOnDayAndRunOnTime(RunOnDay runOnDays, LocalTime runOnTime);
 
 
 }

@@ -9,7 +9,7 @@ public class MetricsDTO {
     private Long id;
     private String userId;
     private String name;
-    private String label;
+    private Label label;
     private Integer threshold;
     private Integer timeFrameHours;
 }
