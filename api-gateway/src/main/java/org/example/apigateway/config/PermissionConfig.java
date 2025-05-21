@@ -32,7 +32,9 @@ public class PermissionConfig {
         permissions.put(Pattern.compile("^/api/metrics/.*"), "updateAction");
 
 
-
+        permissions.put(Pattern.compile("^/api/action/addAction"), "createMetric");
+        permissions.put(Pattern.compile("^/api/action/deleteAction"), "deleteAction");
+        permissions.put(Pattern.compile("^/api/action/.*"), "updateAction");
 
         return permissions;
     }
