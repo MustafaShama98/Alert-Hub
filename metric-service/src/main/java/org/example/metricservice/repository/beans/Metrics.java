@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 @Table(name = "Metrics")  // You can change the table name if needed
 public class Metrics {
 
@@ -22,7 +23,6 @@ public class Metrics {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @NotNull(message = "User ID cannot be null")
     @Size(min = 1, max = 50, message = "User ID must be between 1 and 50 characters")
     @Column(name = "user_id", nullable = false)
     private String userId;
