@@ -25,10 +25,7 @@ const emailService = new EmailService();
 const cleanupKafkaPipeline = async () => {
   try {
     await admin.connect();
-
-    // Delete the consumer group to reset offsets
     await admin.deleteGroups(["email-service-group"]);
-
     console.log("Successfully cleaned up Kafka pipeline");
   } catch (error) {
     console.error("Error cleaning up Kafka pipeline:", error);
@@ -37,21 +34,25 @@ const cleanupKafkaPipeline = async () => {
   }
 };
 
+const isValidJSON = (str) => {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
 const runConsumer = async () => {
   try {
-    // Clean up pipeline before starting
     await cleanupKafkaPipeline();
-
-    // Verify email service
     await emailService.verifyConnection();
-
-    // Connect to Kafka
     await consumer.connect();
     console.log("Connected to Kafka");
 
     await consumer.subscribe({
       topic: "email-topic",
-      fromBeginning: false, // Start from latest messages
+      fromBeginning: false,
     });
     console.log("Subscribed to email-topic");
 
@@ -59,10 +60,21 @@ const runConsumer = async () => {
       autoCommit: true,
       eachMessage: async ({ topic, partition, message }) => {
         try {
-          // Safely convert buffer to string
-          let messageStr = "";
-          if (message.value) {
-            messageStr = Buffer.from(message.value).toString("utf8");
+          if (!message || !message.value) {
+            console.warn("Received empty message, skipping...");
+            return;
+          }
+
+          let messageStr;
+          try {
+            messageStr = message.value.toString('utf8');
+            if (!isValidJSON(messageStr)) {
+              console.error("Invalid JSON message received:", messageStr);
+              return;
+            }
+          } catch (error) {
+            console.error("Error converting message to string:", error);
+            return;
           }
 
           console.log("Received Kafka message:", {
@@ -73,8 +85,15 @@ const runConsumer = async () => {
             value: messageStr,
           });
 
-          // Parse the notification
-          const notification = NotificationDTO.fromJSON(messageStr);
+          const parsedMessage = JSON.parse(messageStr);
+          const notification = new NotificationDTO(
+            parsedMessage.type,
+            parsedMessage.topic,
+            parsedMessage.timestamp,
+            parsedMessage.user,
+            parsedMessage.data
+          );
+
           const userInfo = notification.getUserInfo();
           const { subject, content } = notification.getNotificationContent();
 
@@ -82,25 +101,32 @@ const runConsumer = async () => {
             type: notification.type,
             user: userInfo,
             subject: subject,
-            message: notification.message,
           });
 
-          // Send email
+          if (!userInfo.email || !subject || !content) {
+            console.error("Missing required email data:", { userInfo, subject, content });
+            return;
+          }
+
           await emailService.sendEmail(
-            userInfo.email, // Send to the user's email
+            userInfo.email,
             subject,
             content,
-            null // No plain text version needed since we're using HTML
+            null
           );
 
           console.log("Successfully sent email to:", userInfo.email);
         } catch (error) {
           console.error("Error processing message:", error);
+          // Don't rethrow the error to prevent consumer from crashing
         }
       },
     });
   } catch (error) {
     console.error("Error in consumer:", error);
+    // Attempt to reconnect
+    await consumer.disconnect();
+    setTimeout(runConsumer, 5000);
   }
 };
 

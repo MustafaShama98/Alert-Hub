@@ -21,20 +21,21 @@ public interface PlatformInformationRepository extends JpaRepository<PlatformInf
             "p.label, " +
             "COUNT(CASE WHEN p.label = :label THEN 1 END), " +
             "COUNT(p), " +
-            "CAST(COUNT(p) || ' tasks found for tag ' || p.tag AS string)) " +
+            "CAST(COUNT(p) || ' tasks found for tag ' || p.tag AS string), " +
+            "p.tag) " +
             "FROM PlatformInformation p " +
             "WHERE p.label = :label AND p.timestamp >= :sinceDate " +
             "GROUP BY p.tag, p.label " +
             "ORDER BY COUNT(p) DESC")
     List<LoaderResponseDTO> findTopAssigneeByLabelSince(@Param("label") String label, @Param("sinceDate") LocalDateTime sinceDate);
 
-
     @Query("SELECT new org.example.loaderservice.dto.LoaderResponseDTO(" +
-            "p.tag, " +  // tag will be the label itself
-            "p.label, " +  // label remains the same
-            "COUNT(DISTINCT p.task_number), " + // label_counts is the task count for this label
-            "COUNT(DISTINCT p.task_number), " + // task_counts is the same in this case
-            "CONCAT(COUNT(DISTINCT p.task_number), ' tasks found for label ', p.label)) " +
+            "p.tag, " +
+            "p.label, " +
+            "COUNT(DISTINCT p.task_number), " +
+            "COUNT(DISTINCT p.task_number), " +
+            "CONCAT(COUNT(DISTINCT p.task_number), ' tasks found for label ', p.label), " +
+            "p.tag) " +
             "FROM PlatformInformation p " +
             "WHERE p.developer_id = :developer AND p.timestamp >= :sinceDate " +
             "GROUP BY p.tag, p.label " +
@@ -43,14 +44,18 @@ public interface PlatformInformationRepository extends JpaRepository<PlatformInf
             @Param("sinceDate") LocalDateTime sinceDate);
 
     @Query("SELECT new org.example.loaderservice.dto.LoaderResponseDTO(" +
-            "'total', " + // tag for overall count
-            "'all', " +  // label for overall count
-            "COUNT(DISTINCT p.task_number), " + // label_counts
-            "COUNT(DISTINCT p.task_number), " + // task_counts
-            "CONCAT(COUNT(DISTINCT p.task_number), ' total tasks found for developer ', :developer)) " +
+            "(SELECT p2.tag FROM PlatformInformation p2 WHERE CAST(p2.developer_id AS string) = :developer GROUP BY p2.tag LIMIT 1), " +
+            "'all', " +
+            "COUNT(DISTINCT p.task_number), " +
+            "COUNT(DISTINCT p.task_number), " +
+            "CONCAT(COUNT(DISTINCT p.task_number), ' total tasks found for developer ', :developer), " +
+            "(SELECT p2.tag FROM PlatformInformation p2 WHERE CAST(p2.developer_id AS string) = :developer GROUP BY p2.tag LIMIT 1)) " +
             "FROM PlatformInformation p " +
-            "WHERE p.developer_id = :developer AND p.timestamp >= :sinceDate")
+            "WHERE CAST(p.developer_id AS string) = :developer AND p.timestamp >= :sinceDate")
     LoaderResponseDTO countTasksForDeveloper(@Param("developer") String developer,
             @Param("sinceDate") LocalDateTime sinceDate);
 
+    // Debug query to see raw data
+    @Query("SELECT p FROM PlatformInformation p WHERE CAST(p.developer_id AS string) = :developer")
+    List<PlatformInformation> findRawDataByDeveloperId(@Param("developer") String developer);
 }

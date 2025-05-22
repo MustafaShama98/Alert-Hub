@@ -51,6 +51,7 @@ public class JiraFetcher {
                 task.setTag(values[3]);
                 task.setLabel(values[4]);
                 task.setDeveloper_id(Integer.parseInt(values[5]));
+                task.setDeveloper_name(values[3]);
                 task.setTask_number(values[6]);
                 task.setEnvironment(values[7]);
                 task.setUser_story(values[8]);
@@ -61,13 +62,13 @@ public class JiraFetcher {
                 savedTasks.add(task);
             }
 
-
             reader.close();
+            return savedTasks;
+
         } catch (Exception e) {
             e.printStackTrace();
+            return new ArrayList<>();
         }
-        return savedTasks;
-
     }
 
     @GetMapping("/most-label")

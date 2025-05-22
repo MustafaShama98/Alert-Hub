@@ -67,10 +67,10 @@ class EvaluationServiceImpl implements EvaluationService {
         LoaderResponseDTO loaderResponse = loaderServiceClient.mostLabelDevelper(label, sinceDays);
         
         DeveloperMostLabelResponse response = DeveloperMostLabelResponse.builder()
-                .developerId(loaderResponse.getTag())  // tag contains the developer ID
-                .developerName(loaderResponse.getTag()) // using tag as the developer name since that's what we store
+                .developerId(loaderResponse.getTag())  // tag still contains the developer ID
+                .developerName(loaderResponse.getDeveloperName()) // use developerName instead of tag
                 .label(loaderResponse.getLabel())
-                .count(loaderResponse.getLabel_counts().intValue()) // convert Long to int
+                .count(loaderResponse.getLabel_counts().intValue())
                 .timeFrameDays(sinceDays)
                 .build();
 
@@ -141,7 +141,7 @@ class EvaluationServiceImpl implements EvaluationService {
         
         DeveloperTaskAmountResponse response = DeveloperTaskAmountResponse.builder()
                 .developerId(developerId)
-                .developerName(developerId)
+                .developerName(loaderResponse.getDeveloperName()) // use developerName from response
                 .taskCount(loaderResponse.getTask_counts().intValue())
                 .timeFrameDays(sinceDays)
                 .build();

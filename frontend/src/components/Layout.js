@@ -22,6 +22,7 @@ import {
     People as PeopleIcon,
     AdminPanelSettings as AdminIcon,
     Timeline as TimelineIcon,
+    Schedule as ScheduleIcon,
     Logout as LogoutIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../hooks/useAuth';
@@ -63,6 +64,11 @@ const Layout = () => {
             icon: <TimelineIcon />, 
             path: '/metrics'
         },
+        { 
+            text: 'Actions', 
+            icon: <ScheduleIcon />, 
+            path: '/actions'
+        },
     ];
 
     const drawer = (
@@ -72,6 +78,11 @@ const Layout = () => {
                     Alert Hub
                 </Typography>
             </Toolbar>
+            <Box sx={{ px: 2, pb: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                    Role: {hasPermission('admin') ? 'Admin' : 'User'}
+                </Typography>
+            </Box>
             <Divider />
             <List>
                 {menuItems.map((item) => (

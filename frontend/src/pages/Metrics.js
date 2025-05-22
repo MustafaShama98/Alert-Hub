@@ -34,8 +34,8 @@ const Metrics = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        fetchUsers();
-        fetchAllMetrics();
+         fetchUsers();
+         fetchAllMetrics();
     }, []);
 
     const fetchUsers = async () => {
@@ -50,13 +50,17 @@ const Metrics = () => {
 
     const fetchAllMetrics = async () => {
         try {
+            debugger;
             const response = await metricsApi.getAllMetrics();
+            console.log('Fetched metrics222:', response.data);
             setMetrics(response.data);
             setError('');
         } catch (err) {
             console.error('Error fetching metrics:', err);
             setError('Failed to fetch metrics');
         } finally {
+            console.log('Fetched metrics222:', response.data);
+
             setLoading(false);
         }
     };
@@ -67,6 +71,7 @@ const Metrics = () => {
             const response = await metricsApi.getMetricsByUserId(userId);
             setMetrics(response.data);
             setError('');
+            return response.data;
         } catch (err) {
             console.error('Error fetching user metrics:', err);
             setError('Failed to fetch user metrics');

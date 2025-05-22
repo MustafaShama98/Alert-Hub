@@ -48,6 +48,10 @@ public class PlatformInformation {
     @Column(nullable = false)
     private Integer developer_id = 0;
 
+    @Size(max = 255, message = "Developer name cannot exceed 255 characters")
+    @Column(name = "developer_name")
+    private String developer_name;
+
 //    @Size(max = 500, message = "Issue description cannot exceed 500 characters")
 //    private String issue;
 

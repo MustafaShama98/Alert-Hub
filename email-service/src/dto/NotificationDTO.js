@@ -1,35 +1,46 @@
 class NotificationDTO {
-  constructor(type, topic, timestamp, user, data, message) {
-    this.type = type || "UNKNOWN";
+  constructor(type, topic, timestamp, user, data) {
+    this.type = type;
     this.topic = topic;
-    this.timestamp = timestamp || Date.now();
-    this.user = user || {};
-    this.data = data || {};
-    this.message = message || {};
+    this.timestamp = timestamp;
+    this.user = user;
+    this.data = data;
   }
 
-  static fromJSON(json) {
-    try {
-      // If the input is already an object, use it directly
-      const data = typeof json === "object" ? json : JSON.parse(json);
+  static fromKafkaMessage(message) {
+    const parsed = JSON.parse(message.value);
+    return new NotificationDTO(
+      parsed.type,
+      parsed.topic,
+      parsed.timestamp,
+      parsed.user,
+      parsed.data
+    );
+  }
 
-      return new NotificationDTO(
-        data.type,
-        data.topic,
-        data.timestamp,
-        data.user,
-        data.data,
-        data.message
-      );
-    } catch (error) {
-      console.error("Error parsing notification:", error);
-      return new NotificationDTO(
-        "ERROR",
-        "email-topic",
-        Date.now(),
-        {},
-        { error: "Failed to parse notification" }
-      );
+  getUserInfo() {
+    return {
+      userId: this.user?.userId || "unknown",
+      email: this.user?.email || "unknown",
+      name: this.user?.name || "unknown",
+    };
+  }
+
+  getMessage() {
+    switch (this.type) {
+      case 'MOST_LABEL_SEARCH':
+        return `
+          Developer ${this.data.developerName} has been identified as the most active in the "${this.data.label}" category.
+          
+          Analysis Details:
+          - Label: ${this.data.label}
+          - Number of Tasks: ${this.data.count}
+          - Time Period: Last ${this.data.timeFrameDays} days
+          
+          This developer has shown significant activity in handling ${this.data.label}-related tasks.
+        `;
+      default:
+        return '';
     }
   }
 
@@ -51,13 +62,6 @@ class NotificationDTO {
                     
                 </div>
             `,
-    };
-  }
-  getUserInfo() {
-    return {
-      userId: this.user?.userId || "unknown",
-      email: this.user?.email || "unknown",
-      name: this.user?.name || "unknown",
     };
   }
 

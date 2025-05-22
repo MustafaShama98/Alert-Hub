@@ -60,6 +60,45 @@ public class PlatformInformationService {
     public LoaderResponseDTO taskAmount(String label, int days) {
         LocalDateTime sinceDate = LocalDateTime.now().minusDays(days);
 
-        return platformInformationRepository.countTasksForDeveloper(label, sinceDate);
+        // Debug: Print raw data first
+        System.out.println("\n=== Raw Data from Database ===");
+        List<PlatformInformation> rawData = platformInformationRepository.findRawDataByDeveloperId(label);
+        System.out.println("Found " + rawData.size() + " records for developer ID: " + label);
+        for (PlatformInformation info : rawData) {
+            System.out.println("Record:");
+            System.out.println("  Developer ID: " + info.getDeveloper_id());
+            System.out.println("  Developer Name: " + info.getDeveloper_name());
+            System.out.println("  Task Number: " + info.getTask_number());
+            System.out.println("  Tag: " + info.getTag());
+            System.out.println("  Label: " + info.getLabel());
+            System.out.println("---");
+        }
+
+        LoaderResponseDTO result = platformInformationRepository.countTasksForDeveloper(label, sinceDate);
+        
+        // Debug logging for DTO
+        System.out.println("\n=== DTO Result ===");
+        System.out.println("Developer ID: " + label);
+        System.out.println("Result: " + (result != null ? result.toString() : "null"));
+        if (result != null) {
+            System.out.println("Tag: " + result.getTag());
+            System.out.println("Label: " + result.getLabel());
+            System.out.println("Label Counts: " + result.getLabel_counts());
+            System.out.println("Task Counts: " + result.getTask_counts());
+            System.out.println("Payload: " + result.getPayload());
+            System.out.println("Developer Name: " + result.getDeveloperName());
+        }
+
+        if (result == null) {
+            return new LoaderResponseDTO(
+                "total",
+                "all",
+                0L,
+                0L,
+                "No tasks found for developer " + label,
+                "Unknown Developer"  // Default developer name
+            );
+        }
+        return result;
     }
 }

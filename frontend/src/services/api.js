@@ -63,6 +63,9 @@ export const authApi = {
 
 // Evaluation Service API
 export const evaluationApi = {
+    getUserEvaluations: (userId) =>
+        api.get(`/evaluation/user/${userId}`),
+        
     getMostLabel: (label, since = 30) => 
         api.get(`/evaluation/developer/most-label?label=${label}&since=${since}`),
     
@@ -124,11 +127,29 @@ export const adminApi = {
         api.get('/security/admin/permissions')
 };
 
+// User API endpoints
+export const userApi = {
+    // Get current user profile
+    getCurrentUser: () => 
+        api.get('/api/users/me'),
+
+    // Update user profile
+    updateProfile: (userData) => 
+        api.put('/api/users/profile', userData),
+
+    // Change user password
+    changePassword: (passwordData) => 
+        api.post('/api/users/change-password', passwordData)
+};
+
 // Metrics Service API
 export const metricsApi = {
     getMetricsByUserId: (userId) =>
         api.get(`/metrics/${userId}/by-user-id`),
-    
+
+    createMetric: (metricData) =>
+        api.post('/metrics/addMetric', metricData),
+
     getMetricsById: (id) =>
         api.get(`/metrics/${id}/by-id`),
     
@@ -142,4 +163,26 @@ export const metricsApi = {
         api.post(`/metrics/${id}/delete`)
 };
 
+// Actions Service API
+export const actionsApi = {
+    getAllActions: () =>
+        api.get('/action/all'),
+    
+    getActionById: (id) =>
+        api.get(`/action/${id}`),
+    
+    getUserActions: (userId) =>
+        api.get(`/action/user/${userId}`),
+    
+    createAction: (actionData) =>
+        api.post('/action/addAction', actionData),
+    
+    updateAction: (id, actionData) =>
+        api.put(`/action/${id}`, actionData),
+    
+    deleteAction: (id) =>
+        api.delete(`/action/deleteAction/${id}`)
+};
+
+// Export the base api instance for other uses
 export default api; 

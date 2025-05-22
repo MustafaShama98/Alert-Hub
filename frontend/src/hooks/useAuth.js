@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
 import jwt_decode from 'jwt-decode';
+import { authApi } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
         if (token) {
             try {
                 const decoded = jwt_decode(token);
+                console.log('Decoded token:', decoded);
                 setUser({
                     email: decoded.sub,
                     permissions: decoded.permissions?.split(',') || [],
@@ -30,18 +31,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            const response = await axios.post('http://localhost:8222/api/security/auth/login', 
-                {
-                    email,
-                    password
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                }
-            );
+            const response = await authApi.login({ email, password });
             
             const { token } = response.data;
             if (!token) {
@@ -67,15 +57,7 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (userData) => {
         try {
-            const response = await axios.post('http://localhost:8222/api/security/auth/signup', 
-                userData,
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                }
-            );
+            const response = await authApi.signup(userData);
             return response.data;
         } catch (error) {
             console.error('Registration failed:', error);
