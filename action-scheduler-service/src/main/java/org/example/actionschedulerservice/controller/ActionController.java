@@ -17,6 +17,11 @@ public class ActionController {
     @Autowired
     private JobsService jobsService;
 
+    @GetMapping("/all")
+    public ResponseEntity<List<Action>> getAllActions() {
+        return ResponseEntity.ok(actionService.findAll());
+    }
+
     @PostMapping("/addAction")
     public ResponseEntity<Action> addAction(@RequestBody Action request) {
 

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "Loader-service", url = "http://localhost:8081/api/loader/developer")
+@FeignClient(name = "Loader-service", url = "api/loader/developer")
 public interface LoaderServiceClient {
 
     @GetMapping("/jira")

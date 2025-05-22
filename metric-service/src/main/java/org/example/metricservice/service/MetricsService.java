@@ -68,7 +68,6 @@ public class MetricsService {
     public void addMetric(Metrics metrics) {
         try {
             var user_id = UserContext.getUserId();
-            //var user_email = UserContext.getUserEmail();
             metrics.setUserId(user_id);
             //save id inside metric object
              metricsRepository.save(metrics);
