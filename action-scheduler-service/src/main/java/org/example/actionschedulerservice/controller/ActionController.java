@@ -29,7 +29,7 @@ public class ActionController {
     }
 
 
-    @DeleteMapping("/deleteAction")
+    @DeleteMapping("/deleteAction/{id}")
     public ResponseEntity<Void> deleteAction(@PathVariable Long id) {
         actionService.deleteAction(id);
         return ResponseEntity.noContent().build();

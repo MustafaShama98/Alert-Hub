@@ -19,8 +19,8 @@ public class KafkaConsumerImpl {
     @Autowired
     private ProcessorService processorService; // Inject your API client
     @KafkaListener(topics = "Jobs-Topic", groupId = "job-consumer-group", containerFactory = "jobKafkaListenerContainerFactory")
-    public void listen(ActionDTO message)
-    {
+    public void listen(ActionDTO message){
+        this.platformInformationDTO = this.processorService.getInformation();
         List<List<Integer>> metricsId = message.getCondition();
         boolean andOperator = true;
         boolean orOperator = false;
@@ -60,12 +60,12 @@ public class KafkaConsumerImpl {
     // Runs every minute
     //@Scheduled(cron = "0 0 * * * *")
     //every 5 min
-    @Scheduled(cron = "0 */5 * * * *")
-    @Transactional
-    public void fetchPlatformInfo(){
-        this.platformInformationDTO = this.processorService.getInformation();
-    }
-
+//    @Scheduled(cron = "0 */4 * * * *")
+//    @Transactional
+//    public void fetchPlatformInfo(){
+//        this.platformInformationDTO = this.processorService.getInformation();
+//    }
+//
 
     public boolean getIssuesIfThresholdMet(List<PlatformInformationDTO> allIssues
             , Label label, int threshold, int timeFrameHours) {
