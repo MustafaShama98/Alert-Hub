@@ -6,21 +6,24 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "metric-service" , url = "http://localhost:8083") // Change port if needed
+@FeignClient(name = "metric-service" , path = "/api/metrics") // Change port if needed
 public interface MetricServiceClient {
 
-    @GetMapping("/metrics/{id}/by-id")
+    @GetMapping("/{id}/by-id")
     ResponseEntity<MetricsDTO> getMatricById(@PathVariable Long id);
 
-    @PostMapping("/metrics/{id}")
+    @PostMapping("/{id}")
     ResponseEntity<MetricsDTO> updateMetric(@PathVariable("id") Long id, @RequestBody MetricsDTO metrics);
 
-    @GetMapping("/metrics/{id}/by-user-id")
+    @GetMapping("/{id}/by-user-id")
     ResponseEntity<List<MetricsDTO>> getByUserId(@PathVariable("id") String userId);
 
-    @GetMapping("/metrics/all")
+    @GetMapping("/all")
     ResponseEntity<List<MetricsDTO>> getAllMetrics();
 
-    @PostMapping("/metrics/{id}/delete")
+    @PostMapping("/{id}/delete")
     ResponseEntity<MetricsDTO> deleteMetric(@PathVariable("id") Long id);
+
+    @PostMapping("/addMetric")
+    ResponseEntity<?> addMetric(@RequestBody MetricsDTO metrics);
 }

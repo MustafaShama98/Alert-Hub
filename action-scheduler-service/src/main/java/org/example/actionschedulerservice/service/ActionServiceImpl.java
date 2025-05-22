@@ -15,6 +15,10 @@ public class ActionServiceImpl implements ActionService {
 
     @Override
     public Action addAction(Action request) {
+//        var user_id = UserContext.getUserId();
+//        var user_email = UserContext.getUserEmail();
+//        request.setUserId(user_id);
+//        request.setTo(user_email);
         return repository.save(request);
     }
 //

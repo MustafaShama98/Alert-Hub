@@ -19,11 +19,12 @@ public class ActionController {
 
     @PostMapping("/addAction")
     public ResponseEntity<Action> addAction(@RequestBody Action request) {
+
         return ResponseEntity.ok(actionService.addAction(request));
     }
 
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deleteAction")
     public ResponseEntity<Void> deleteAction(@PathVariable Long id) {
         actionService.deleteAction(id);
         return ResponseEntity.noContent().build();
