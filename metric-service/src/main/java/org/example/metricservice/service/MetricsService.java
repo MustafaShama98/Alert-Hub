@@ -2,8 +2,10 @@ package org.example.metricservice.service;
 
 
 
+import lombok.Builder;
 import org.example.metricservice.repository.beans.Metrics;
 import org.example.metricservice.repository.MetricsRepository;
+import org.example.metricservice.util.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,7 @@ import java.util.Optional;
 public class MetricsService {
     @Autowired
     MetricsRepository metricsRepository;
+
 
     public List<Metrics> getByUserId(String id) {
         return metricsRepository.findByUserId(id);
@@ -37,6 +40,9 @@ public class MetricsService {
 
     // Method 6: Update an existing Metric
     public Metrics updateMetric(Long id, Metrics metricsDetails) {
+        var user_id = UserContext.getUserId();
+        //var user_email = UserContext.getUserEmail();
+        metricsDetails.setUserId(user_id);
         Metrics existingMetrics = this.getMetricsById(id);  // First, check if the metric exists
         if(existingMetrics != null){
             existingMetrics.setUserId(metricsDetails.getUserId());
@@ -59,7 +65,17 @@ public class MetricsService {
             return null;// Save the updated metric
         }
     }
-
+    public void addMetric(Metrics metrics) {
+        try {
+            var user_id = UserContext.getUserId();
+            metrics.setUserId(user_id);
+            //save id inside metric object
+             metricsRepository.save(metrics);
+        } catch (Exception e) {
+            // Catch-all for any other unexpected exceptions
+            System.err.println("Unexpected error while saving action: " + e.getMessage());
+        }
+    }
 
 //    private MetricsDTO convertToDTO(Metrics metrics) {
 //        return new MetricsDTO(

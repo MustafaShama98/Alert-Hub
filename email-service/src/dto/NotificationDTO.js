@@ -1,70 +1,89 @@
 class NotificationDTO {
-    constructor(type, topic, timestamp, user, data) {
-        this.type = type || 'UNKNOWN';
-        this.topic = topic;
-        this.timestamp = timestamp || Date.now();
-        this.user = user || {};
-        this.data = data || {};
-    }
+  constructor(type, topic, timestamp, user, data, message) {
+    this.type = type || "UNKNOWN";
+    this.topic = topic;
+    this.timestamp = timestamp || Date.now();
+    this.user = user || {};
+    this.data = data || {};
+    this.message = message || {};
+  }
 
-    static fromJSON(json) {
-        try {
-            // If the input is already an object, use it directly
-            const data = typeof json === 'object' ? json : JSON.parse(json);
-            
-            return new NotificationDTO(
-                data.type,
-                data.topic,
-                data.timestamp,
-                data.user,
-                data.data
-            );
-        } catch (error) {
-            console.error('Error parsing notification:', error);
-            return new NotificationDTO(
-                'ERROR',
-                'email-topic',
-                Date.now(),
-                {},
-                { error: 'Failed to parse notification' }
-            );
-        }
-    }
+  static fromJSON(json) {
+    try {
+      // If the input is already an object, use it directly
+      const data = typeof json === "object" ? json : JSON.parse(json);
 
-    getFormattedTimestamp() {
-        return new Date(this.timestamp).toLocaleString();
+      return new NotificationDTO(
+        data.type,
+        data.topic,
+        data.timestamp,
+        data.user,
+        data.data,
+        data.message
+      );
+    } catch (error) {
+      console.error("Error parsing notification:", error);
+      return new NotificationDTO(
+        "ERROR",
+        "email-topic",
+        Date.now(),
+        {},
+        { error: "Failed to parse notification" }
+      );
     }
+  }
 
-    getFormattedType() {
-        return (this.type || 'UNKNOWN').replace(/_/g, ' ').toLowerCase();
-    }
+  getFormattedTimestamp() {
+    return new Date(this.timestamp).toLocaleString();
+  }
 
-    getUserInfo() {
+  getFormattedType() {
+    return (this.type || "UNKNOWN").replace(/_/g, " ").toLowerCase();
+  }
+
+  formatMessage() {
+    const mesagge = this.message;
+    return {
+      subject: `New Scheduler Notification`,
+      content: `
+                <div class="analysis-result">
+                    <h2>🏆  ${mesagge}</h2>
+                    
+                </div>
+            `,
+    };
+  }
+  getUserInfo() {
+    return {
+      userId: this.user?.userId || "unknown",
+      email: this.user?.email || "unknown",
+      name: this.user?.name || "unknown",
+    };
+  }
+
+  getNotificationContent() {
+    switch (this.type) {
+      case "MOST_LABEL_SEARCH":
+        return this.formatMostLabelContent();
+      case "LABEL_AGGREGATE":
+        return this.formatLabelAggregateContent();
+      case "TASK_AMOUNT":
+        return this.formatTaskAmountContent();
+      case "ACTION":
+        return this.formatMessage();
+      default:
         return {
-            userId: this.user?.userId || 'unknown',
-            email: this.user?.email || 'unknown',
-            name: this.user?.name || 'unknown'
+          subject: "Notification",
+          content: "Unknown notification type",
         };
     }
+  }
 
-    getNotificationContent() {
-        switch (this.type) {
-            case 'MOST_LABEL_SEARCH':
-                return this.formatMostLabelContent();
-            case 'LABEL_AGGREGATE':
-                return this.formatLabelAggregateContent();
-            case 'TASK_AMOUNT':
-                return this.formatTaskAmountContent();
-            default:
-                return { subject: 'Notification', content: 'Unknown notification type' };
-        }
-    }
-
-    formatMostLabelContent() {
-        const data = this.data;
-        return {
-            subject: `Most Used Label Analysis: ${data.label}`,
-            content: `
+  formatMostLabelContent() {
+    const data = this.data;
+    return {
+      subject: `Most Used Label Analysis: ${data.label}`,
+      content: `
                 <div class="analysis-result">
                     <h2>🏆 Label Analysis Results</h2>
                     <table>
@@ -92,22 +111,25 @@ class NotificationDTO {
                     <p><strong>Summary:</strong> Developer ${data.developerName} has the highest usage of label '${data.label}' 
                     with ${data.count} tasks in the analyzed period.</p>
                 </div>
-            `
-        };
-    }
+            `,
+    };
+  }
 
-    formatLabelAggregateContent() {
-        const data = this.data;
-        const labelRows = data.labels.map(label => 
-            `<tr>
+  formatLabelAggregateContent() {
+    const data = this.data;
+    const labelRows = data.labels
+      .map(
+        (label) =>
+          `<tr>
                 <td>${label.label}</td>
                 <td><span class="label-count">${label.count}</span> tasks</td>
             </tr>`
-        ).join('');
+      )
+      .join("");
 
-        return {
-            subject: `Label Analysis Report for ${data.developerId}`,
-            content: `
+    return {
+      subject: `Label Analysis Report for ${data.developerId}`,
+      content: `
                 <div class="analysis-result">
                     <h2>📊 Label Usage Analysis</h2>
                     <p>Analysis for developer ${data.developerId} over the last ${data.timeFrameDays} days:</p>
@@ -124,15 +146,15 @@ class NotificationDTO {
                         </tbody>
                     </table>
                 </div>
-            `
-        };
-    }
+            `,
+    };
+  }
 
-    formatTaskAmountContent() {
-        const data = this.data;
-        return {
-            subject: `Task Analysis for ${data.developerName}`,
-            content: `
+  formatTaskAmountContent() {
+    const data = this.data;
+    return {
+      subject: `Task Analysis for ${data.developerName}`,
+      content: `
                 <div class="analysis-result">
                     <h2>📋 Task Amount Analysis</h2>
                     <table>
@@ -156,19 +178,20 @@ class NotificationDTO {
                     <p><strong>Summary:</strong> Developer ${data.developerName} has completed 
                     <span class="label-count">${data.taskCount}</span> tasks in the analyzed period.</p>
                 </div>
-            `
-        };
-    }
+            `,
+    };
+  }
 
-    toJSON() {
-        return {
-            type: this.type,
-            topic: this.topic,
-            timestamp: this.timestamp,
-            user: this.user,
-            data: this.data
-        };
-    }
+  toJSON() {
+    return {
+      type: this.type,
+      topic: this.topic,
+      timestamp: this.timestamp,
+      user: this.user,
+      data: this.data,
+      mesagge: this.message,
+    };
+  }
 }
 
-module.exports = NotificationDTO; 
+module.exports = NotificationDTO;

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.example.metricservice.models.Label;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 @Table(name = "Metrics")  // You can change the table name if needed
 public class Metrics {
 
@@ -21,7 +23,6 @@ public class Metrics {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @NotNull(message = "User ID cannot be null")
     @Size(min = 1, max = 50, message = "User ID must be between 1 and 50 characters")
     @Column(name = "user_id", nullable = false)
     private String userId;
@@ -34,7 +35,8 @@ public class Metrics {
 
     @NotNull(message = "Label cannot be null")
     @Column(nullable = false)
-    private String label;
+    @Enumerated(EnumType.STRING)
+    private Label label;
 
     @NotNull(message = "Threshold cannot be null")
     @Min(value = 0, message = "Threshold must be a positive number")

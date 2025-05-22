@@ -1,6 +1,7 @@
 package org.example.metricservice.controller;
 import org.example.metricservice.repository.beans.Metrics;
 import org.example.metricservice.service.MetricsService;
+import org.example.metricservice.util.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/metrics")
+@RequestMapping("/api/metrics")
 public class MetricsController {
     @Autowired
     MetricsService metricsService;
@@ -24,7 +25,7 @@ public class MetricsController {
     // Get a specific Metrics record by ID
 
     @GetMapping("/{id}/by-id")
-    public ResponseEntity<Metrics> getMatricsById(@PathVariable Long id) {
+    public ResponseEntity<Metrics> getMatricById(@PathVariable Long id) {
         if(metricsService.getMetricsById(id)==null){
             //404
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -58,6 +59,17 @@ public class MetricsController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PostMapping("/addMetric")
+    public ResponseEntity<?> addMetric(@RequestBody @Valid Metrics metrics) {
+        try {
+
+            metricsService.addMetric(metrics);
+            return ResponseEntity.status(HttpStatus.CREATED).body(metrics);
+        } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error: " + e.getMessage());
+    }
     }
 
 }
