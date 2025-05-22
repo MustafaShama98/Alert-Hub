@@ -27,7 +27,7 @@ public class Action {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id")
     private Long userId;
 
     @Column(name = "name", nullable = false)
@@ -44,7 +44,7 @@ public class Action {
     @Convert(converter = ConditionConverter.class)
     private List<List<Integer>> condition; // e.g., "[[1,2],[3]]"
 
-    @Column(name = "sent_to", nullable = false)
+    @Column(name = "sent_to")
     private String to; // e.g., phone number or email address
 
 //    @NotNull(message = "Action Type cannot be null")

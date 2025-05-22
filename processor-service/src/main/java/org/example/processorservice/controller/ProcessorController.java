@@ -1,5 +1,6 @@
 package org.example.processorservice.controller;
 
+import feign.FeignException;
 import org.example.processorservice.dto.ActionDTO;
 import org.example.processorservice.dto.MetricsDTO;
 import org.example.processorservice.service.ProcessorService;
@@ -8,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -34,7 +36,18 @@ public class ProcessorController {
 
     @GetMapping("/by-id/{id}")
     public MetricsDTO getMetricById(@PathVariable Long id) {
-        return processorService.getMetricById(id);
+        try {
+            return processorService.getMetricById(id);
+        } catch (FeignException.NotFound e) {
+            // Metric not found in the metric-service
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Metric with ID " + id + " not found");
+        } catch (FeignException e) {
+            // Other Feign errors (e.g. 500, 403)
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Failed to fetch metric: " + e.getMessage(), e);
+        } catch (Exception e) {
+            // Fallback for unexpected errors
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred", e);
+        }
     }
 
     @PostMapping("/update/{id}")
