@@ -6,6 +6,7 @@ import org.example.processorservice.service.ProcessorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,6 +42,7 @@ public class ProcessorController {
         return processorService.sendMetricUpdate(id, metrics);
     }
 
+
     @DeleteMapping("/delete/{id}")
     public MetricsDTO deleteMetric(@PathVariable Long id) {
         return processorService.deleteMetric(id);
@@ -54,7 +56,7 @@ public class ProcessorController {
     @PostMapping("/trigger-manual-process")
     public ResponseEntity<String> triggerManualProcess(@RequestBody ActionDTO action) {
         boolean success = processorService.manuallyTriggerAction(action);
-        
+
         if (success) {
             return ResponseEntity.ok("Action triggered successfully");
         } else {
