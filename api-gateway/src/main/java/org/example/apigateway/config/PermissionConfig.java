@@ -38,7 +38,7 @@ public class PermissionConfig {
 
         // Action Service permissions - example with multiple permissions
         permissions.put(Pattern.compile("^/api/action/addAction"), Arrays.asList("createAction", "modifyActions"));
-        permissions.put(Pattern.compile("^/api/action/deleteAction"), Arrays.asList("deleteAction", "modifyActions"));
+        permissions.put(Pattern.compile("^/api/action/deleteAction/.*"), Arrays.asList("deleteAction", "modifyActions"));
         permissions.put(Pattern.compile("^/api/action/all"), List.of("read"));
         permissions.put(Pattern.compile("^/api/action/.*"), List.of("updateAction"));
 
