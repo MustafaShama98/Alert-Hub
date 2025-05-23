@@ -108,7 +108,7 @@ const Login = () => {
                             {loading ? 'Signing in...' : 'Sign In'}
                         </Button>
                         <Box sx={{ textAlign: 'center' }}>
-                            <Link to="/register" style={{ textDecoration: 'none' }}>
+                            <Link to="/signup" style={{ textDecoration: 'none' }}>
                                 <Typography variant="body2" color="primary">
                                     Don't have an account? Sign Up
                                 </Typography>

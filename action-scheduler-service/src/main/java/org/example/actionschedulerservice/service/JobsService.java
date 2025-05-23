@@ -35,7 +35,7 @@ public class JobsService {
 
 
     // Runs every minute
-    @Scheduled(cron = "0 */5 * * * *")
+    @Scheduled(cron = "0 */1 * * * *")
     @Transactional
     public void processDueTasks() {
         RunOnDay today = RunOnDay.valueOf(LocalDate.now().getDayOfWeek().name().toUpperCase());

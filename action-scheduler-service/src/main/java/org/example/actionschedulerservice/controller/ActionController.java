@@ -24,10 +24,18 @@ public class ActionController {
 
     @PostMapping("/addAction")
     public ResponseEntity<Action> addAction(@RequestBody Action request) {
-
         return ResponseEntity.ok(actionService.addAction(request));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Action> updateAction(@PathVariable Long id, @RequestBody Action request) {
+        try {
+            Action updatedAction = actionService.updateAction(id, request);
+            return ResponseEntity.ok(updatedAction);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
     @DeleteMapping("/deleteAction/{id}")
     public ResponseEntity<Void> deleteAction(@PathVariable Long id) {

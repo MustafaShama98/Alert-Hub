@@ -1,10 +1,11 @@
 class NotificationDTO {
-  constructor(type, topic, timestamp, user, data) {
+  constructor(type, topic, timestamp, user, data, message) {
     this.type = type;
     this.topic = topic;
     this.timestamp = timestamp;
     this.user = user;
     this.data = data;
+    this.message = message;
   }
 
   static fromKafkaMessage(message) {
@@ -14,7 +15,8 @@ class NotificationDTO {
       parsed.topic,
       parsed.timestamp,
       parsed.user,
-      parsed.data
+      parsed.data,
+      parsed.message
     );
   }
 
@@ -53,15 +55,88 @@ class NotificationDTO {
   }
 
   formatMessage() {
-    const mesagge = this.message;
+    const actionData = this.data || {};
+    const conditions = actionData.condition || [];
+    
+    // Format conditions for display
+    const formattedConditions = conditions.map((andGroup, index) => {
+      return `Group ${index + 1}: Metric ID(s) ${andGroup.join(' AND ')}`;
+    }).join('\nOR\n');
+
+    // Format date and time
+    const runDay = actionData.runOnDay || 'Not specified';
+    const runTime = actionData.runOnTime ? `${actionData.runOnTime[0]}:${String(actionData.runOnTime[1]).padStart(2, '0')}` : 'Not specified';
+    const createDate = actionData.createDate ? `${actionData.createDate[0]}-${String(actionData.createDate[1]).padStart(2, '0')}-${String(actionData.createDate[2]).padStart(2, '0')}` : 'Not specified';
+    const lastUpdate = actionData.lastUpdate ? 
+      `${actionData.lastUpdate[0]}-${String(actionData.lastUpdate[1]).padStart(2, '0')}-${String(actionData.lastUpdate[2]).padStart(2, '0')} ${String(actionData.lastUpdate[3]).padStart(2, '0')}:${String(actionData.lastUpdate[4]).padStart(2, '0')}` 
+      : 'Not specified';
+
     return {
-      subject: `New Scheduler Notification`,
+      subject: `⏰ Scheduled Action: ${actionData.actionType || 'Alert'}`,
       content: `
-                <div class="analysis-result">
-                    <h2>🏆  ${mesagge}</h2>
-                    
-                </div>
-            `,
+        <div class="analysis-result" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">⏰ Scheduled Action Details</h2>
+            
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                <h3 style="color: #2c3e50; margin-top: 0;">📅 Schedule Information</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <th style="text-align: left; padding: 8px; color: #666;">Runs On</th>
+                        <td style="padding: 8px;">${runDay} at ${runTime}</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding: 8px; color: #666;">Status</th>
+                        <td style="padding: 8px;">${actionData.enabled ? '✅ Enabled' : '❌ Disabled'}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                <h3 style="color: #2c3e50; margin-top: 0;">🎯 Action Details</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <th style="text-align: left; padding: 8px; color: #666;">Action Type</th>
+                        <td style="padding: 8px;">${actionData.actionType || 'N/A'}</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding: 8px; color: #666;">Message</th>
+                        <td style="padding: 8px;">${this.message || 'No message provided'}</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding: 8px; color: #666;">Created By</th>
+                        <td style="padding: 8px;">${actionData.name || 'Unknown'}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                <h3 style="color: #2c3e50; margin-top: 0;">🔍 Conditions</h3>
+                <pre style="background-color: #fff; padding: 10px; border-radius: 4px; white-space: pre-wrap;">${formattedConditions}</pre>
+            </div>
+
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                <h3 style="color: #2c3e50; margin-top: 0;">📊 Additional Information</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <th style="text-align: left; padding: 8px; color: #666;">Created Date</th>
+                        <td style="padding: 8px;">${createDate}</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding: 8px; color: #666;">Last Updated</th>
+                        <td style="padding: 8px;">${lastUpdate}</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding: 8px; color: #666;">Last Run</th>
+                        <td style="padding: 8px;">${actionData.lastRun || 'Never'}</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding: 8px; color: #666;">Action ID</th>
+                        <td style="padding: 8px;">#${actionData.id || 'N/A'}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+      `
     };
   }
 

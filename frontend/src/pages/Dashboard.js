@@ -15,7 +15,7 @@ import {
     AdminPanelSettings as AdminIcon,
     Timeline as TimelineIcon,
 } from '@mui/icons-material';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { evaluationApi, usersApi, metricsApi } from '../services/api';
 
 const DashboardCard = ({ title, icon, description, count, loading, error, onClick }) => (
@@ -104,9 +104,10 @@ const Dashboard = () => {
             } catch (error) {
                 console.error('Error fetching stats:', error);
                 setStats(prev => ({
+                    ...prev,
                     evaluations: { loading: false, count: 0, error: 'Failed to load' },
                     users: { loading: false, count: 0, error: 'Failed to load' },
-                    metrics: { loading: false, count: 0, error: 'Failed to load' },
+                    metrics: { loading: false, count: 0, error: 'Failed to load' }
                 }));
             }
         };

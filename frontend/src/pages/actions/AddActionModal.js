@@ -11,16 +11,24 @@ import {
     Box,
     Switch,
     FormControlLabel,
-    FormHelperText
+    FormHelperText,
+    Chip,
+    IconButton,
+    Typography,
+    Paper
 } from '@mui/material';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import Modal from '../../components/common/Modal';
-import { actionsApi } from '../../services/api';
+import { actionsApi, metricsApi } from '../../services/api';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useAuth } from '../../hooks/useAuth';
 
 const ACTION_TYPES = ['EMAIL', 'SMS'];
 const RUN_DAYS = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'ALL'];
 
 const AddActionModal = ({ open, onClose, onActionAdded, action }) => {
+    const { user } = useAuth();
     const [formData, setFormData] = useState({
         name: '',
         actionType: '',
@@ -33,6 +41,9 @@ const AddActionModal = ({ open, onClose, onActionAdded, action }) => {
     });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [metrics, setMetrics] = useState([]);
+    const [selectedMetric, setSelectedMetric] = useState('');
+    const [selectedConditionGroup, setSelectedConditionGroup] = useState(0);
 
     useEffect(() => {
         if (action) {
@@ -52,7 +63,18 @@ const AddActionModal = ({ open, onClose, onActionAdded, action }) => {
                 condition: [[]]
             });
         }
+        fetchUserMetrics();
     }, [action]);
+
+    const fetchUserMetrics = async () => {
+        try {
+            const response = await metricsApi.getMetricsByUserId(user.userId);
+            setMetrics(response.data);
+        } catch (err) {
+            console.error('Error fetching metrics:', err);
+            setError('Failed to fetch metrics');
+        }
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -67,6 +89,46 @@ const AddActionModal = ({ open, onClose, onActionAdded, action }) => {
             ...prev,
             runOnTime: time
         }));
+    };
+
+    const handleAddMetricToCondition = () => {
+        if (!selectedMetric) return;
+
+        setFormData(prev => {
+            const newCondition = [...prev.condition];
+            newCondition[selectedConditionGroup] = [
+                ...(newCondition[selectedConditionGroup] || []),
+                parseInt(selectedMetric)
+            ];
+            return { ...prev, condition: newCondition };
+        });
+        setSelectedMetric('');
+    };
+
+    const handleAddConditionGroup = () => {
+        setFormData(prev => ({
+            ...prev,
+            condition: [...prev.condition, []]
+        }));
+        setSelectedConditionGroup(formData.condition.length);
+    };
+
+    const handleRemoveMetric = (groupIndex, metricIndex) => {
+        setFormData(prev => {
+            const newCondition = [...prev.condition];
+            newCondition[groupIndex] = newCondition[groupIndex].filter((_, idx) => idx !== metricIndex);
+            return { ...prev, condition: newCondition };
+        });
+    };
+
+    const handleRemoveGroup = (groupIndex) => {
+        setFormData(prev => ({
+            ...prev,
+            condition: prev.condition.filter((_, idx) => idx !== groupIndex)
+        }));
+        if (selectedConditionGroup === groupIndex) {
+            setSelectedConditionGroup(Math.max(0, groupIndex - 1));
+        }
     };
 
     const handleSubmit = async () => {
@@ -89,7 +151,8 @@ const AddActionModal = ({ open, onClose, onActionAdded, action }) => {
 
             const actionData = {
                 ...formData,
-                runOnTime: formattedTime
+                runOnTime: formattedTime,
+                condition: formData.condition.filter(group => group.length > 0) // Remove empty groups
             };
 
             if (action?.id) {
@@ -105,6 +168,11 @@ const AddActionModal = ({ open, onClose, onActionAdded, action }) => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const getMetricNameById = (id) => {
+        const metric = metrics.find(m => m.id === id);
+        return metric ? metric.name : `Metric ${id}`;
     };
 
     const modalActions = (
@@ -204,6 +272,100 @@ const AddActionModal = ({ open, onClose, onActionAdded, action }) => {
                         type={formData.actionType === 'EMAIL' ? 'email' : 'tel'}
                     />
                 </Grid>
+
+                {/* Metric Conditions Section */}
+                <Grid item xs={12}>
+                    <Paper sx={{ p: 2, mb: 2 }}>
+                        <Typography variant="h6" gutterBottom>
+                            Metric Conditions
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Add metrics to create condition groups. Metrics within a group use OR logic, while different groups use AND logic.
+                        </Typography>
+                        
+                        <Box sx={{ mb: 2 }}>
+                            <FormControl fullWidth sx={{ mb: 1 }}>
+                                <InputLabel>Select Metric</InputLabel>
+                                <Select
+                                    value={selectedMetric}
+                                    onChange={(e) => setSelectedMetric(e.target.value)}
+                                    label="Select Metric"
+                                    disabled={loading}
+                                >
+                                    <MenuItem value="">
+                                        <em>None</em>
+                                    </MenuItem>
+                                    {metrics.map(metric => (
+                                        <MenuItem key={metric.id} value={metric.id}>
+                                            {metric.name} ({metric.label})
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                <Button
+                                    variant="outlined"
+                                    onClick={handleAddMetricToCondition}
+                                    disabled={!selectedMetric}
+                                    startIcon={<AddIcon />}
+                                >
+                                    Add to Group {selectedConditionGroup + 1}
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    onClick={handleAddConditionGroup}
+                                    startIcon={<AddIcon />}
+                                >
+                                    New Group
+                                </Button>
+                            </Box>
+                        </Box>
+
+                        {formData.condition.map((group, groupIndex) => (
+                            <Paper 
+                                key={groupIndex}
+                                variant="outlined"
+                                sx={{ 
+                                    p: 1,
+                                    mb: 1,
+                                    bgcolor: selectedConditionGroup === groupIndex ? 'action.selected' : 'background.paper'
+                                }}
+                                onClick={() => setSelectedConditionGroup(groupIndex)}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                    <Typography variant="subtitle2">
+                                        Group {groupIndex + 1}
+                                    </Typography>
+                                    <IconButton 
+                                        size="small"
+                                        onClick={() => handleRemoveGroup(groupIndex)}
+                                        sx={{ ml: 'auto' }}
+                                    >
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </Box>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                    {group.map((metricId, metricIndex) => (
+                                        <Chip
+                                            key={metricIndex}
+                                            label={getMetricNameById(metricId)}
+                                            onDelete={() => handleRemoveMetric(groupIndex, metricIndex)}
+                                            color="primary"
+                                            variant="outlined"
+                                        />
+                                    ))}
+                                    {group.length === 0 && (
+                                        <Typography variant="body2" color="text.secondary">
+                                            No metrics in this group
+                                        </Typography>
+                                    )}
+                                </Box>
+                            </Paper>
+                        ))}
+                    </Paper>
+                </Grid>
+
                 <Grid item xs={12}>
                     <TextField
                         name="message"

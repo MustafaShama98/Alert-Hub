@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.example.actionschedulerservice.repository.ActionRepository;
 import org.example.actionschedulerservice.repository.beans.Action;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -27,10 +28,28 @@ public class ActionServiceImpl implements ActionService {
 
     @Override
     public Action updateAction(Long id, Action request) {
-        Action action = repository.findById(id)
+        // Get current user context
+        var userId = Long.valueOf(UserContext.getUserId());
+        var email = UserContext.getUserEmail();
+
+        // Find existing action
+        Action existingAction = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Action not found"));
-        BeanUtils.copyProperties(request, action, "id");
-        return repository.save(action);
+
+        // Verify ownership
+        if (!existingAction.getUserId().equals(userId)) {
+            throw new RuntimeException("Not authorized to update this action");
+        }
+
+        // Update fields while preserving certain values
+        request.setId(id);
+        request.setUserId(userId);
+        request.setTo(email);
+        request.setCreateDate(existingAction.getCreateDate());
+        request.setLastUpdate(LocalDateTime.now());
+
+        // Save and return updated action
+        return repository.save(request);
     }
 
     @Override

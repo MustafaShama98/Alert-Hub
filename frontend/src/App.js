@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './hooks/useAuth';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import Login from './pages/auth/Login';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
 import Admin from './pages/admin/Admin';
@@ -11,9 +10,12 @@ import Metrics from './pages/metrics/Metrics';
 import Evaluation from './pages/evaluation/Evaluation';
 import Actions from './pages/actions/Actions';
 import { PermissionsProvider } from './hooks/usePermissions';
-
-// Lazy load other components
-const Dashboard = () => <div>Dashboard Page</div>;
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import NotFoundPage from './pages/errors/NotFoundPage';
+import UnauthorizedPage from './pages/errors/UnauthorizedPage';
+import UnauthenticatedPage from './pages/errors/UnauthenticatedPage';
+import Dashboard from './pages/Dashboard';
 
 function App() {
   return (
@@ -22,8 +24,13 @@ function App() {
         <PermissionsProvider>
           <Router>
             <Routes>
-              <Route path="/login" element={<Login />} />
+              {/* Public Routes */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/unauthorized" element={<UnauthorizedPage />} />
+              <Route path="/unauthenticated" element={<UnauthenticatedPage />} />
               
+              {/* Protected Routes */}
               <Route
                 path="/"
                 element={
@@ -81,8 +88,8 @@ function App() {
                 />
               </Route>
 
-              {/* Catch all route - redirect to home */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+              {/* 404 Route */}
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Router>
         </PermissionsProvider>

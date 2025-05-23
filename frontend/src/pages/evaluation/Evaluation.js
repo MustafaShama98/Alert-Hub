@@ -474,75 +474,10 @@ const Evaluation = () => {
         return (
             <Grid container spacing={3} sx={{ mt: 2 }}>
                 {/* Evaluation Results */}
-                {success && (
-                    <Grid item xs={12}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6" color="primary" gutterBottom>
-                                    Latest Evaluation Results
-                                </Typography>
-                                <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
-                                    <Typography variant="body1" component="pre" sx={{ whiteSpace: 'pre-wrap' }}>
-                                        {success}
-                                    </Typography>
-                                </Box>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                )}
+
 
                 {/* Most Active Developers Results */}
-                {mostActiveData && (
-                    <Grid item xs={12} md={6}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6" color="primary" gutterBottom>
-                                    Most Active Developers - {selectedLabel}
-                                </Typography>
-                                {mostActiveData.developers?.map((dev, index) => (
-                                    <Box
-                                        key={dev.id}
-                                        sx={{
-                                            mb: 2,
-                                            p: 2,
-                                            border: '1px solid',
-                                            borderColor: 'divider',
-                                            borderRadius: 1,
-                                        }}
-                                    >
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <Box>
-                                                <Typography variant="subtitle1">
-                                                    {dev.name || dev.email}
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Last active: {new Date(dev.lastActive).toLocaleDateString()}
-                                                </Typography>
-                                            </Box>
-                                            <Box>
-                                                <Chip
-                                                    label={`${dev.count} contributions`}
-                                                    color="primary"
-                                                    size="small"
-                                                    sx={{ mr: 1 }}
-                                                />
-                                                <Button
-                                                    size="small"
-                                                    onClick={() => {
-                                                        handleFetchLabelAggregate(dev.id);
-                                                        handleFetchTaskAmount(dev.id);
-                                                    }}
-                                                >
-                                                    View Details
-                                                </Button>
-                                            </Box>
-                                        </Box>
-                                    </Box>
-                                ))}
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                )}
+
 
                 {/* Label Aggregates Results */}
                 {aggregateData && (
@@ -595,7 +530,7 @@ const Evaluation = () => {
         return (
             <Box sx={{ mt: 4 }}>
                 <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-                    API Response Details
+                    Graphs
                 </Typography>
                 {Object.entries(apiResponses).map(([endpoint, { timestamp, data }]) => {
                     let responseComponent;

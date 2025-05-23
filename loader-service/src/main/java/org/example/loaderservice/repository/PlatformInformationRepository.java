@@ -44,12 +44,12 @@ public interface PlatformInformationRepository extends JpaRepository<PlatformInf
             @Param("sinceDate") LocalDateTime sinceDate);
 
     @Query("SELECT new org.example.loaderservice.dto.LoaderResponseDTO(" +
-            "(SELECT p2.tag FROM PlatformInformation p2 WHERE CAST(p2.developer_id AS string) = :developer GROUP BY p2.tag LIMIT 1), " +
+            "(SELECT MIN(p2.tag) FROM PlatformInformation p2 WHERE CAST(p2.developer_id AS string) = :developer), " +
             "'all', " +
             "COUNT(DISTINCT p.task_number), " +
             "COUNT(DISTINCT p.task_number), " +
             "CONCAT(COUNT(DISTINCT p.task_number), ' total tasks found for developer ', :developer), " +
-            "(SELECT p2.tag FROM PlatformInformation p2 WHERE CAST(p2.developer_id AS string) = :developer GROUP BY p2.tag LIMIT 1)) " +
+            "(SELECT MIN(p2.tag) FROM PlatformInformation p2 WHERE CAST(p2.developer_id AS string) = :developer)) " +
             "FROM PlatformInformation p " +
             "WHERE CAST(p.developer_id AS string) = :developer AND p.timestamp >= :sinceDate")
     LoaderResponseDTO countTasksForDeveloper(@Param("developer") String developer,

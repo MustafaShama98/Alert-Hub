@@ -17,14 +17,16 @@ public class NotificationMessageDTO {
 
     private user user;
     private String message;
+    private Object data;
 
     @Data
     @Builder
     public static class user {
         private String email;
         private long userId;
+        private String name;
     }
-    public static NotificationMessageDTO create(String type, String message, user user, String topic) {
-        return new NotificationMessageDTO(type, System.currentTimeMillis(),topic,user,message);
+    public static NotificationMessageDTO create(String type, String message, user user, String topic, Object data) {
+        return new NotificationMessageDTO(type, System.currentTimeMillis(),topic,user,message,data);
     }
 }

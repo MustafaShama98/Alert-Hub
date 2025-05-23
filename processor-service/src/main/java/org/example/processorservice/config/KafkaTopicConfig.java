@@ -12,7 +12,7 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic smsTopic() {
-        return TopicBuilder.name("email-topic")
+        return TopicBuilder.name("sms-topic")
                 .build();
     }
 
